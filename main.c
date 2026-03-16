@@ -7,6 +7,7 @@
 typedef enum Tools {
   PEN,
   LINE,
+  RECTANGLE,
 } Tools;
 
 Tools tools;
@@ -16,28 +17,28 @@ int main() {
   bool mouseWasPressed = false;
   // int tools[] = {1,2,3};
 
+  RenderTexture2D target = LoadRenderTexture(1000,1000);
+
+    // Clear render texture before entering the game loop
+    // BeginTextureMode(target);
+    // // ClearBackground(BLACK);
+    // EndTextureMode();
+
+    // SetTargetFPS(1200000000000000);              // Set our game to run at 120 frames-per-second
+
   while(!WindowShouldClose()) {
 
     tools = LINE;
-    // DrawRectangle(10,10,100,40,RAYWHITE);
-
-    
-    // for (int i = 0; i < 3; i++)
-    // {
-    //   DrawRectangleLines(10,10,30,40,GREEN);
-    // }
-    
-
-
-    
-    // ClearBackground(RAYWHITE);
-    // SetTargetFPS(144);
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN && mouseWasPressed == false ){
-      mouseWasPressed = true;
+      // mouseWasPressed = true;
       int x= GetMouseX();
       int y= GetMouseY();
-      
+
+      BeginTextureMode(target);
       DrawCircle(x,y,10,RED);
+            
+      EndTextureMode();
+      
       // DrawFPS(10,10);
     } 
 
@@ -47,58 +48,21 @@ int main() {
       mouseWasPressed = true;
       xline= GetMouseX();
       yline= GetMouseY();
-      
-      // Vector2 xx = GetMouseDelta();
-      
     } else if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && tools == LINE && mouseWasPressed) {
       mouseWasPressed = false;
       int x= GetMouseX();
       int y= GetMouseY();
-      DrawLine(xline,yline,x,y,RED);
+      BeginTextureMode(target);
+      DrawLine(xline,yline,x,y,GREEN);
+      
+      DrawRectangle(10,10,100,100,BLACK);
+      DrawFPS(10,10);
+      EndTextureMode();
       
     }
-
-
-    // if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)){
-    //   DrawRectangle(10,10,100,100,RED);
-    // }
     BeginDrawing();
-      // else if (IsMouseButtonUp(MOUSE_BUTTON_LEFT)) {
-      //   int x= GetMouseX();
-      //   int y= GetMouseY();
-        
-      //   DrawCircle(x,y,10,BLACK);
-      // }
-
-      // if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-      // {
-      //   int x= GetMouseX();
-      //   int y= GetMouseY();
-      //   Vector2 mousepos2 = GetMousePosition();
-      //   DrawText("10",mousepos2.x,mousepos2.y,100,BLACK);
-
-        
-      //   DrawCircle(x,y,10,BLACK);
-      // }
-      // if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-      // {
-      //   int x= GetMouseX();
-      //   int y= GetMouseY();
-      //   Vector2 mousepos2 = GetMousePosition();
-      //   DrawText("10",mousepos2.x,mousepos2.y,100,BLACK);
-        
-      //   DrawCircle(x,y,10,BLACK);
-      // }
-
-      // if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
-      // {
-      //   int x= GetMouseX();
-      //   int y= GetMouseY();
-      //   DrawText("10",10,10,100,BLACK);
-
-        
-      //   DrawCircle(x,y,10,WHITE);
-      // }
+    // ClearBackground(RAYWHITE);
+    DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
     EndDrawing();
   } 
     

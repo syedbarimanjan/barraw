@@ -25,26 +25,109 @@ int main() {
     // // ClearBackground(BLACK);
     // EndTextureMode();
 
-    // SetTargetFPS(1200000000000000);              // Set our game to run at 120 frames-per-second
+    // SetTargetFPS(1200000000000000); 
+    
+    Vector2 prevMouse = {0};
+bool penStarted = false;
+    
+    while(!WindowShouldClose()) {
+      
+      // tools = CIRCLE;
+      if(IsKeyPressed(KEY_R)){
+        tools = RECTANGLE;
+      } else if(IsKeyPressed(KEY_C)){
+        tools = CIRCLE;
+      } else if(IsKeyPressed(KEY_P)){
+        tools = PEN;
+      } else if (IsKeyPressed(KEY_L)){
+        tools = LINE;
+      }
+      if(IsKeyPressed(KEY_A)){
+        BeginTextureMode(target);
+        ClearBackground(BLACK);
+        EndTextureMode();
+      }
+    // int xpen;
+    // int ypen;
 
-  while(!WindowShouldClose()) {
+    // int x = GetMouseX();
+    // int y = GetMouseY();
+    // mouseWasPressed = false;
+    // bool penfirstcircle = false;
+    // if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN && mouseWasPressed == false ){
+    //   // mouseWasPressed = true;
+    //   xpen= GetMouseX();
+    //   ypen= GetMouseY();
 
-    tools = RECTANGLE;
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN && mouseWasPressed == false ){
-      // mouseWasPressed = true;
-      int x= GetMouseX();
-      int y= GetMouseY();
+    //   if(penfirstcircle){
+
+    //   }
+      
+    //   Vector2 del = GetMouseDelta();
+
+    //   BeginTextureMode(target);
+    //   DrawCircle(del.x+100,del.y+100,10,RED);
+
+    //   DrawCircle(x,y,10,GREEN);
+
+    //   DrawRectangle(10,10,100,100,BLACK);
+    //   DrawFPS(10,10);
+            
+    //   EndTextureMode();
+      
+    //   // DrawFPS(10,10);
+    // } 
+    // else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == PEN ){
+    //   // mouseWasPressed = false;
+    //     BeginTextureMode(target);
+    //   DrawCircle(10,10,100,GREEN);
+
+    //   // DrawRectangle(10,10,100,100,BLACK);
+    //   // DrawFPS(10,10);
+            
+    //   EndTextureMode();
+    // }
+
+    Vector2 curr = GetMousePosition();
+
+    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && tools == PEN)
+    {
+      if (!penStarted)
+      {
+          prevMouse = curr;
+          penStarted = true;
+      }
+
+      float dx = curr.x - prevMouse.x;
+      float dy = curr.y - prevMouse.y;
+      float dist = sqrt(dx*dx + dy*dy);
+
+      float spacing = 5.0f;
 
       BeginTextureMode(target);
-      DrawCircle(x,y,10,RED);
 
-      DrawRectangle(10,10,100,100,BLACK);
-      DrawFPS(10,10);
-            
-      EndTextureMode();
-      
-      // DrawFPS(10,10);
-    } 
+      for (float i = 0; i < dist; i += spacing)
+      {
+          float t = i / dist;
+
+          float x = prevMouse.x + dx * t;
+          float y = prevMouse.y + dy * t;
+
+          DrawCircle(x, y, 10, RED);
+        }
+        
+        EndTextureMode();
+        
+        prevMouse = curr;
+        DrawRectangle(10,10,100,100,BLACK);
+  
+        DrawText(TextFormat("%d a",curr),10,10,20,RED);
+        DrawText(TextFormat("%d bv",prevMouse),20,30,20,RED);
+    }
+    else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && tools == PEN)
+    {
+        penStarted = false;
+    }
 
     int xline;
     int yline;
@@ -100,6 +183,7 @@ int main() {
       float radius = sqrt(dx*dx + dy*dy);
       
       DrawCircleLines((xlinecircle+x)/2,(ylinecircle+y)/2,radius/2,PINK);
+      DrawCircle((xlinecircle+x)/2,(ylinecircle+y)/2,10,RED);
       
       DrawRectangle(10,10,100,100,BLACK);
       DrawFPS(10,10);

@@ -132,18 +132,36 @@ int main() {
         penStarted = false;
     }
 
+    Vector2 a;
     int xline;
     int yline;
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && tools == LINE && mouseWasPressed == false) {
-      mouseWasPressed = true;
-      xline= GetMouseX();
-      yline= GetMouseY();
-    } else if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && tools == LINE && mouseWasPressed) {
-      mouseWasPressed = false;
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == LINE) {
+      if(!mouseIsDown){
+        a=GetMousePosition();
+        pm = a;
+        mouseIsDown = true;
+        continue;
+      }
+      
+      
+      a=GetMousePosition();
+      int x= GetMouseX();
+      int y= GetMouseY();
+      BeginTextureMode(target2);
+      ClearBackground(BLACK);
+      DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
+
+      
+      DrawRectangle(10,10,100,100,BLACK);
+      DrawFPS(10,10);
+      EndTextureMode();
+    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == LINE) {
+      mouseIsDown = false;
       int x= GetMouseX();
       int y= GetMouseY();
       BeginTextureMode(target);
-      DrawLine(xline,yline,x,y,GREEN);
+      DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
+
       
       DrawRectangle(10,10,100,100,BLACK);
       DrawFPS(10,10);
@@ -170,7 +188,6 @@ int main() {
     //   EndTextureMode();
       
     // }
-    Vector2 a;
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == RECTANGLE) {
       if(!mouseIsDown){

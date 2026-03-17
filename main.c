@@ -249,11 +249,11 @@ int main() {
       DrawFPS(10,10);
       EndTextureMode();
     } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == CIRCLE) {
-      // mouseWasPressed = false;
+      mouseIsDown = false;
       int x= GetMouseX();
       int y= GetMouseY();
       BeginTextureMode(target);
-      ClearBackground(BLACK);
+      // ClearBackground(BLACK);
       float dx = a.x-pm.x;
       float dy = a.y -pm.y;
       float radius = sqrt(dx*dx + dy*dy);

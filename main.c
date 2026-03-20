@@ -14,25 +14,19 @@ typedef enum Tools {
 Tools tools;
 
 int main() {
-  InitWindow(1000, 1000, "Barraw");
+  InitWindow(2000, 1000, "Barraw");
   bool mouseWasPressed = false;
   bool mouseIsDown = false;
-  // int tools[] = {1,2,3};
-
-  RenderTexture2D target = LoadRenderTexture(1000,1000);
-  RenderTexture2D target2 = LoadRenderTexture(1000,1000);
-
-  // Clear render texture before entering the game loop
-  // BeginTextureMode(target);
-  // // ClearBackground(BLACK);
-  // EndTextureMode();
-
-  // SetTargetFPS(1200000000000000); 
+  
+  RenderTexture2D target = LoadRenderTexture(2000,1000);
+  RenderTexture2D target2 = LoadRenderTexture(2000,1000);
   
   Vector2 prevMouse = {0};
   bool penStarted = false;
   Vector2 pm = {0};
-    
+  
+  float penradius = 1.0f;
+  tools= PEN;
   while(!WindowShouldClose()) {
       
     // tools = CIRCLE;
@@ -50,62 +44,29 @@ int main() {
       ClearBackground(BLACK);
       EndTextureMode();
     }
-    // int xpen;
-    // int ypen;
 
-    // int x = GetMouseX();
-    // int y = GetMouseY();
-    // mouseWasPressed = false;
-    // bool penfirstcircle = false;
-    // if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN && mouseWasPressed == false ){
-    //   // mouseWasPressed = true;
-    //   xpen= GetMouseX();
-    //   ypen= GetMouseY();
-
-    //   if(penfirstcircle){
-
-    //   }
-      
-    //   Vector2 del = GetMouseDelta();
-
-    //   BeginTextureMode(target);
-    //   DrawCircle(del.x+100,del.y+100,10,RED);
-
-    //   DrawCircle(x,y,10,GREEN);
-
-    //   DrawRectangle(10,10,100,100,BLACK);
-    //   DrawFPS(10,10);
-            
-    //   EndTextureMode();
-      
-    //   // DrawFPS(10,10);
-    // } 
-    // else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == PEN ){
-    //   // mouseWasPressed = false;
-    //     BeginTextureMode(target);
-    //   DrawCircle(10,10,100,GREEN);
-
-    //   // DrawRectangle(10,10,100,100,BLACK);
-    //   // DrawFPS(10,10);
-            
-    //   EndTextureMode();
-    // }
-
+    
     Vector2 curr = GetMousePosition();
-
+    float mousewheel = GetMouseWheelMove();
+    penradius+=GetMouseWheelMove();
+    if (penradius < 2) penradius = 2;
+    if (penradius > 50) penradius = 50;
+    
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && tools == PEN)
     {
       if (!penStarted)
       {
-          prevMouse = curr;
-          penStarted = true;
+        prevMouse = curr;
+        penStarted = true;
       }
+      
+      
 
       float dx = curr.x - prevMouse.x;
       float dy = curr.y - prevMouse.y;
       float dist = sqrt(dx*dx + dy*dy);
 
-      float spacing = 5.0f;
+      float spacing = 0.1f;
 
       BeginTextureMode(target);
 
@@ -116,7 +77,7 @@ int main() {
           float x = prevMouse.x + dx * t;
           float y = prevMouse.y + dy * t;
 
-          DrawCircle(x, y, 10, RED);
+          DrawCircle(x, y, penradius, RED);
         }
         
         DrawRectangle(10,10,100,100,BLACK);
@@ -133,8 +94,6 @@ int main() {
     }
 
     Vector2 a;
-    int xline;
-    int yline;
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == LINE) {
       if(!mouseIsDown){
         a=GetMousePosition();
@@ -157,8 +116,6 @@ int main() {
       EndTextureMode();
     } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == LINE) {
       mouseIsDown = false;
-      int x= GetMouseX();
-      int y= GetMouseY();
       BeginTextureMode(target);
       DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
 
@@ -168,26 +125,6 @@ int main() {
       EndTextureMode();
       
     }
-    // int xlinerec;
-    // int ylinerec;
-    // mouseWasPressed = true;
-    // if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && tools == RECTANGLE && mouseWasPressed == false) {
-    //   mouseWasPressed = true;
-    //   xlinerec= GetMouseX();
-    //   ylinerec= GetMouseY();
-    // } else if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && tools == RECTANGLE && mouseWasPressed) {
-    //   mouseWasPressed = false;
-    //   int x= GetMouseX();
-    //   int y= GetMouseY();
-    //   BeginTextureMode(target);
-    //   DrawRectangleLines(xlinerec,ylinerec,x-xlinerec,y-ylinerec,BLUE);
-    //   DrawCircle((xlinerec+x)/2,(ylinerec+y)/2,10,RED);
-      
-    //   DrawRectangle(10,10,100,100,BLACK);
-    //   DrawFPS(10,10);
-    //   EndTextureMode();
-      
-    // }
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == RECTANGLE) {
       if(!mouseIsDown){
@@ -196,10 +133,6 @@ int main() {
         mouseIsDown = true;
         continue;
       }
-      // if (a.x)
-      // {
-      //   a=GetMousePosition();
-      // }
       
       
       a=GetMousePosition();
@@ -208,47 +141,28 @@ int main() {
       BeginTextureMode(target2);
       ClearBackground(BLACK);
       DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y,BLUE);
-      // DrawRectangle(pm.x+1,pm.y+1,a.x-pm.x,a.y-pm.y,RED);
-      // DrawCircle((pm.x+x)/2,(pm.y+y)/2,10,RED);
-      
       DrawRectangle(10,10,100,100,BLACK);
       DrawFPS(10,10);
       EndTextureMode();
-      
-      // mouseIsDown = false;
-      
-      // a=GetMousePosition();
     }
     else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == RECTANGLE){
 
       mouseIsDown = false;
       BeginTextureMode(target);
-      // ClearBackground(BLACK);
       DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y,BLUE);
-      // DrawRectangle(pm.x+1,pm.y+1,a.x-pm.x,a.y-pm.y,RED);
-      // DrawCircle((pm.x+x)/2,(pm.y+y)/2,10,RED);
       
       DrawRectangle(10,10,100,100,BLACK);
       DrawFPS(10,10);
       EndTextureMode();
     }
-    int xlinecircle;
-    int ylinecircle;
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == CIRCLE) {
-      // mouseWasPressed = true;
-      xlinecircle= GetMouseX();
-      ylinecircle= GetMouseY();
 
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == CIRCLE) {
       if(!mouseIsDown){
         a=GetMousePosition();
         pm = a;
         mouseIsDown = true;
         continue;
       }
-      // if (a.x)
-      // {
-      //   a=GetMousePosition();
-      // }
       
       
       a=GetMousePosition();
@@ -270,7 +184,6 @@ int main() {
       int x= GetMouseX();
       int y= GetMouseY();
       BeginTextureMode(target);
-      // ClearBackground(BLACK);
       float dx = a.x-pm.x;
       float dy = a.y -pm.y;
       float radius = sqrt(dx*dx + dy*dy);

@@ -4,6 +4,62 @@
 #include <raylib.h>
 #include <raymath.h>
 
+typedef struct {
+  int id;
+  float x;
+  float y;
+  float width;
+  float height;
+  Color color;
+} Rectangled;
+
+typedef struct {
+  int id;
+  int centerX;
+  int centerY;
+  float radius;
+  Color color;
+} Circle;
+
+
+typedef struct {
+  int id;
+  int startPosX;
+  int startPosY; 
+  int endPosX;
+  int endPosY;
+  Color color;
+} Line;
+
+typedef struct {
+  int id;
+  Circle *circles;
+} FreeLine;
+
+typedef enum {
+  SHAPE_RECTANGLE,
+  SHAPE_CIRCLE,
+  SHAPE_LINE,
+  SHAPE_FREELINE
+} Shapes;
+
+typedef struct {
+  Shapes type;
+  union {
+    Rectangled rectangle;
+    Circle circle;
+    Line line;
+    FreeLine freeline;
+  } shape;
+} Shape;
+
+// can use flexible array method here.
+typedef struct {
+  int id;
+  Shape *shapesArray;
+  int shapeCount;
+} Layer;
+
 typedef enum Tools {
   PEN,
   LINE,
@@ -17,6 +73,11 @@ int main() {
   InitWindow(2000, 1000, "Barraw");
   bool mouseWasPressed = false;
   bool mouseIsDown = false;
+
+  int shapesCount;
+  Shape *shapes;
+  shapes = malloc(sizeof(Shape) * shapesCount);
+
   
   RenderTexture2D target = LoadRenderTexture(2000,1000);
   RenderTexture2D target2 = LoadRenderTexture(2000,1000);
@@ -39,10 +100,9 @@ int main() {
     } else if (IsKeyPressed(KEY_L)){
       tools = LINE;
     }
+
     if(IsKeyPressed(KEY_A)){
-      BeginTextureMode(target);
-      ClearBackground(BLACK);
-      EndTextureMode();
+      free(shapes);
     }
 
     
@@ -108,6 +168,7 @@ int main() {
       int y= GetMouseY();
       BeginTextureMode(target2);
       ClearBackground(BLACK);
+
       DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
 
       
@@ -116,13 +177,22 @@ int main() {
       EndTextureMode();
     } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == LINE) {
       mouseIsDown = false;
-      BeginTextureMode(target);
-      DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
-
-      
-      DrawRectangle(10,10,100,100,BLACK);
-      DrawFPS(10,10);
-      EndTextureMode();
+      shapesCount+=1;
+      shapes = realloc(shapes,sizeof(Shape) * shapesCount);
+      shapes->type = SHAPE_LINE;
+      shapes[0].shape.line = (Line) {
+        .color = GREEN,
+        .id = 1,
+        .startPosX = pm.x,
+        .startPosY = pm.y,
+        .endPosX = a.x,
+        .endPosY = a.y,
+      };
+      // BeginTextureMode(target);
+      // DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
+      // DrawRectangle(10,10,100,100,BLACK);
+      // DrawFPS(10,10);
+      // EndTextureMode();
       
     }
 
@@ -195,6 +265,14 @@ int main() {
       EndTextureMode();
       
     }
+    
+    BeginTextureMode(target);
+      for(int i = 0; i < shapesCount; i++){
+        if(shapes->type == SHAPE_LINE) {
+          DrawLine(shapes[i].shape.line.startPosX,shapes[i].shape.line.startPosY,shapes[i].shape.line.endPosX,shapes[i].shape.line.endPosY,shapes[i].shape.line.color);
+        }
+      }
+    EndTextureMode();
     BeginDrawing();
     // ClearBackground(RAYWHITE);
     DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);

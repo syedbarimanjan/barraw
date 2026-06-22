@@ -79,7 +79,7 @@ int main() {
   Shape *shapes;
   shapes = malloc(sizeof(Shape) * shapesCount);
 
-  int circleCount = 1000;
+  int circleCount = 0;
   Circle *circles;
   circles = malloc(sizeof(Circle) * circleCount);
 
@@ -112,81 +112,60 @@ int main() {
     if (penradius < 2) penradius = 2;
     if (penradius > 50) penradius = 50;
     
-    // if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && tools == PEN)
-    // {
-    //   if (!penStarted)
-    //   {
-    //     prevMouse = curr;
-    //     penStarted = true;
-    //   }
+    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && tools == PEN) {
+      if (!penStarted) {
+        prevMouse = curr;
+        penStarted = true;
+      }
       
-    //   float dx = curr.x - prevMouse.x;
-    //   float dy = curr.y - prevMouse.y;
-    //   float dist = sqrt(dx*dx + dy*dy);
+      float dx = curr.x - prevMouse.x;
+      float dy = curr.y - prevMouse.y;
+      float dist = sqrt(dx*dx + dy*dy);
 
-    //   float spacing = 0.1f;
+      float spacing = 0.1f;
 
-    //   float t;
-    //   float x;
-    //   float y;
+      float t;
+      float x;
+      float y;
 
-    //   for (float i = 0; i < dist; i += spacing){
-        
-    //     t = i / dist;
-    //     x = prevMouse.x + dx * t;
-    //     y = prevMouse.y + dy * t;
-        
-    //     // circles[(int)i].centerY = y;
-    //     // circles[(int)i].radius = penradius;
-    //     // circles[(int)i].color = RED;
-        
-    //     // DrawCircle(x, y, penradius, RED);
-    //   }
+      for (float i = 0; i < dist; i += spacing) {
+        t = i / dist;
+        x = prevMouse.x + dx * t;
+        y = prevMouse.y + dy * t;
+        // DrawCircle(x, y, penradius, RED);
+      }
       
-    //   circleCount +=1;
-    //   circles = realloc(circles,(sizeof(Circle) * circleCount));
+      circleCount +=1;
+      circles = realloc(circles,sizeof(Circle) * circleCount);
+      circles[circleCount -1] = (Circle) {
+        .id = circleCount -1,
+        .centerX = x,
+        .centerY = y,
+        .radius = penradius,
+        .color = RED
+      };
+      prevMouse = curr;
+    }
+    else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && tools == PEN){
+      penStarted = false;
+      shapesCount += 1;
+      shapes = realloc(shapes,sizeof(Shape) * shapesCount);
 
-    //   shapesCount += 1;
-    //   shapes = realloc(shapes,sizeof(Shape) * shapesCount);
+      Circle *circlesCopy = malloc(sizeof(Circle) *circleCount);
+      for(int i = 0; i < circleCount; i++){
+        circlesCopy[i] = circles[i];
+      }
       
-    //   shapes[shapesCount - 1].type = SHAPE_FREELINE;
-    //   shapes[shapesCount - 1].shape.freeline = (FreeLine) {
-    //     .id = shapesCount -1,
-    //     .circles = malloc(sizeof(Circle) * 1),
-    //     .circlesCount = circleCount
-    //   };
-
-    //   FreeLine *currentLine = &shapes[shapesCount -1].shape.freeline;
-
-    //   currentLine->circles[circleCount -1] = (Circle) {
-    //     .id = circleCount -1,
-    //     .centerX = x,
-    //     .centerY = y,
-    //     .radius = penradius,
-    //     .color = RED
-    //   };
-
-    //   // BeginTextureMode(target);
-    //     // ClearBackground(BLACK);
-    //     // for (float i = 0; i < dist; i += spacing){
-    //     //   float t = i / dist;
-
-    //     //   float x = prevMouse.x + dx * t;
-    //     //   float y = prevMouse.y + dy * t;
-
-    //     //   DrawCircle(x, y, penradius, RED);
-    //     // }
-        
-    //     // DrawRectangle(10,10,100,100,BLACK);
-    //     // DrawText(TextFormat("%d a",curr),10,10,20,RED);
-    //     // DrawText(TextFormat("%d bv",prevMouse),20,30,20,RED);
-    //   // EndTextureMode();
-      
-    //   prevMouse = curr;
-    // }
-    // else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && tools == PEN){
-    //   penStarted = false;
-    // }
+      shapes[shapesCount - 1].type = SHAPE_FREELINE;
+      shapes[shapesCount - 1].shape.freeline = (FreeLine) {
+        .id = shapesCount -1,
+        .circles = circlesCopy,
+        .circlesCount = circleCount
+      };
+      circleCount = 0;
+      free(circles);
+      circles = NULL;
+    }
 
     
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == LINE) {
@@ -345,19 +324,17 @@ int main() {
             shapes[i].shape.circle.radius,
             shapes[i].shape.circle.color
           );
-        } 
-        // else if(shapes[i].type == SHAPE_FREELINE) {
-        //   // int length = sizeof(shapes[i].shape.freeline.circles)/sizeof(Circle);
-        //   FreeLine line = shapes[i].shape.freeline;
-        //   for(int j = 0; j < line.circlesCount; j++){
-        //     DrawCircle(
-        //       shapes[i].shape.freeline.circles[j].centerX,
-        //       shapes[i].shape.freeline.circles[j].centerY,
-        //       shapes[i].shape.freeline.circles[j].radius,
-        //       shapes[i].shape.freeline.circles[j].color
-        //     );
-        //   }
-        // }
+        } else if(shapes[i].type == SHAPE_FREELINE) {
+          FreeLine line = shapes[i].shape.freeline;
+          for(int j = 0; j < line.circlesCount; j++){
+            DrawCircle(
+              shapes[i].shape.freeline.circles[j].centerX,
+              shapes[i].shape.freeline.circles[j].centerY,
+              shapes[i].shape.freeline.circles[j].radius,
+              shapes[i].shape.freeline.circles[j].color
+            );
+          }
+        }
       }
     EndTextureMode();
     BeginDrawing();

@@ -315,6 +315,33 @@ int main() {
             shapes[i].shape.line.endPosY,
             shapes[i].shape.line.color
           );
+
+          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            Vector2 mouseDelta = GetMouseDelta();
+            Vector2 currentMousePosition = GetMousePosition();
+
+            Vector2 p1 = (Vector2) {
+              .x = shapes[i].shape.line.startPosX,
+              .y = shapes[i].shape.line.startPosY,
+            };
+
+            Vector2 p2 = (Vector2) {
+              .x = shapes[i].shape.line.endPosX,
+              .y = shapes[i].shape.line.endPosY,
+            };
+
+            if(CheckCollisionPointLine(currentMousePosition,p1,p2,1000)){
+              DrawFPS(10,10);
+              DrawLineV(p1,p2,RED);
+              DrawCircle(p1.x,p1.y,10,RED);
+              shapes[i].shape.line.startPosX += mouseDelta.x;
+              shapes[i].shape.line.startPosY += mouseDelta.y;
+
+              DrawCircle(p2.x,p2.y,10,RED);
+              shapes[i].shape.line.endPosX += mouseDelta.x;
+              shapes[i].shape.line.endPosY += mouseDelta.y;
+            }
+          }
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
           DrawRectangleLines(
             shapes[i].shape.rectangle.x,
@@ -323,6 +350,24 @@ int main() {
             shapes[i].shape.rectangle.height,
             shapes[i].shape.rectangle.color
           );
+
+          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            Vector2 mouseDelta = GetMouseDelta();
+            Vector2 currentMousePosition = GetMousePosition();
+
+            Rectangle rec = (Rectangle) {
+              .x =shapes[i].shape.rectangle.x,
+              .y =shapes[i].shape.rectangle.y,
+              .width =shapes[i].shape.rectangle.width,
+              .height =shapes[i].shape.rectangle.height,
+            };
+            if(CheckCollisionPointRec(currentMousePosition,rec)){
+              DrawFPS(10,10);
+              DrawRectangleLinesEx(rec,2.0,RED);
+              shapes[i].shape.rectangle.x += mouseDelta.x;
+              shapes[i].shape.rectangle.y += mouseDelta.y;
+            }
+          }
         } else if(shapes[i].type == SHAPE_CIRCLE) {
           DrawCircleLines(
             shapes[i].shape.circle.centerX,
@@ -330,6 +375,25 @@ int main() {
             shapes[i].shape.circle.radius,
             shapes[i].shape.circle.color
           );
+
+          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            Vector2 mouseDelta = GetMouseDelta();
+            Vector2 currentMousePosition = GetMousePosition();
+
+            Vector2 circleCenter = (Vector2) {
+              .x = shapes[i].shape.circle.centerX,
+              .y = shapes[i].shape.circle.centerY,
+            };
+
+            float circleRadius = shapes[i].shape.circle.radius;
+
+            if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
+              DrawFPS(10,10);
+              DrawCircleLinesV(circleCenter,circleRadius,RED);
+              shapes[i].shape.circle.centerX += mouseDelta.x;
+              shapes[i].shape.circle.centerY += mouseDelta.y;
+            }
+          }
         } else if(shapes[i].type == SHAPE_FREELINE) {
           FreeLine line = shapes[i].shape.freeline;
           for(int j = 0; j < line.circlesCount; j++){
@@ -341,39 +405,8 @@ int main() {
             );
           }
         }
-        Vector2 mousePositionPrevious = GetMousePosition();
-        DrawText(TextFormat("%d",mousePositionPrevious),10,10,10,RED);
-        // GetMouseDelta()
-        if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-          Vector2 mousePositionCurrent = GetMouseDelta();
-          Vector2 mousePositionCurrent2 = GetMousePosition();
-          DrawText(TextFormat("%d",mousePositionCurrent),100,100,10,RED);
-          int mousePositionDifferenceX = mousePositionPrevious.x - mousePositionCurrent.x;
-          int mousePositionDifferenceY = mousePositionPrevious.y - mousePositionCurrent.y;
-          Rectangle rec = (Rectangle) {
-            .x =shapes[i].shape.rectangle.x,
-            .y =shapes[i].shape.rectangle.y,
-            .width =shapes[i].shape.rectangle.width,
-            .height =shapes[i].shape.rectangle.height,
-          };
-          if(CheckCollisionPointRec(mousePositionCurrent2,rec)){
-            DrawFPS(10,10);
-            DrawRectangleLinesEx(rec,2.0,RED);
-            // DrawRectangleLines(
-            //   shapes[i].shape.rectangle.x,
-            //   shapes[i].shape.rectangle.y,
-            //   shapes[i].shape.rectangle.width,
-            //   shapes[i].shape.rectangle.height,
-            //   BLUE
-            // );
-            shapes[i].shape.rectangle.x += mousePositionCurrent.x;
-            shapes[i].shape.rectangle.y += mousePositionCurrent.y;
-            // shapes[i].shape.rectangle.width;
-            // shapes[i].shape.rectangle.height;
-            // BeginTextureMode(target2);
-            // EndTextureMode();
-          }
-        }
+        
+        
       }
     EndTextureMode();
 

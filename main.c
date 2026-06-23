@@ -66,6 +66,7 @@ typedef enum Tools {
   LINE,
   RECTANGLE,
   CIRCLE,
+  SELECTION,
 } Tools;
 
 Tools tools;
@@ -104,6 +105,8 @@ int main() {
       tools = PEN;
     } else if (IsKeyPressed(KEY_L)){
       tools = LINE;
+    } else if(IsKeyPressed(KEY_V)){
+      tools = SELECTION;
     }
 
     Vector2 curr = GetMousePosition();
@@ -111,8 +114,10 @@ int main() {
     penradius+=GetMouseWheelMove();
     if (penradius < 2) penradius = 2;
     if (penradius > 50) penradius = 50;
+
     
-    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && tools == PEN) {
+    
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN) {
       if (!penStarted) {
         prevMouse = curr;
         penStarted = true;
@@ -145,7 +150,7 @@ int main() {
       
       prevMouse = curr;
     }
-    else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && tools == PEN){
+    else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == PEN){
       penStarted = false;
       shapesCount += 1;
       shapes = realloc(shapes,sizeof(Shape) * shapesCount);
@@ -168,7 +173,6 @@ int main() {
         ClearBackground(BLACK);
       EndTextureMode();
     }
-
     
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == LINE) {
       if(!mouseIsDown){
@@ -337,16 +341,50 @@ int main() {
             );
           }
         }
+        Vector2 mousePositionPrevious = GetMousePosition();
+        DrawText(TextFormat("%d",mousePositionPrevious),10,10,10,RED);
+        // GetMouseDelta()
+        if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+          Vector2 mousePositionCurrent = GetMouseDelta();
+          Vector2 mousePositionCurrent2 = GetMousePosition();
+          DrawText(TextFormat("%d",mousePositionCurrent),100,100,10,RED);
+          int mousePositionDifferenceX = mousePositionPrevious.x - mousePositionCurrent.x;
+          int mousePositionDifferenceY = mousePositionPrevious.y - mousePositionCurrent.y;
+          Rectangle rec = (Rectangle) {
+            .x =shapes[i].shape.rectangle.x,
+            .y =shapes[i].shape.rectangle.y,
+            .width =shapes[i].shape.rectangle.width,
+            .height =shapes[i].shape.rectangle.height,
+          };
+          if(CheckCollisionPointRec(mousePositionCurrent2,rec)){
+            DrawFPS(10,10);
+            DrawRectangleLinesEx(rec,2.0,RED);
+            // DrawRectangleLines(
+            //   shapes[i].shape.rectangle.x,
+            //   shapes[i].shape.rectangle.y,
+            //   shapes[i].shape.rectangle.width,
+            //   shapes[i].shape.rectangle.height,
+            //   BLUE
+            // );
+            shapes[i].shape.rectangle.x += mousePositionCurrent.x;
+            shapes[i].shape.rectangle.y += mousePositionCurrent.y;
+            // shapes[i].shape.rectangle.width;
+            // shapes[i].shape.rectangle.height;
+            // BeginTextureMode(target2);
+            // EndTextureMode();
+          }
+        }
       }
     EndTextureMode();
+
     BeginDrawing();
     DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
     DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
     EndDrawing();
   }
   
-  UnloadRenderTexture(target); 
-  UnloadRenderTexture(target2); 
+  // UnloadRenderTexture(target); 
+  // UnloadRenderTexture(target2); 
   CloseWindow();
     
   return 0;

@@ -122,28 +122,27 @@ int main() {
       float dy = curr.y - prevMouse.y;
       float dist = sqrt(dx*dx + dy*dy);
 
-      float spacing = 0.1f;
-
-      float t;
-      float x;
-      float y;
+      float spacing = 1.0f;
 
       for (float i = 0; i < dist; i += spacing) {
-        t = i / dist;
-        x = prevMouse.x + dx * t;
-        y = prevMouse.y + dy * t;
-        // DrawCircle(x, y, penradius, RED);
+        float t = i / dist;
+        float x = prevMouse.x + dx * t;
+        float y = prevMouse.y + dy * t;
+        BeginTextureMode(target2);
+          DrawCircle(x, y, penradius, RED);
+        EndTextureMode();
+
+        circleCount += 1;
+        circles = realloc(circles,sizeof(Circle) * circleCount);
+        circles[circleCount -1] = (Circle) {
+          .id = circleCount -1,
+          .centerX = x,
+          .centerY = y,
+          .radius = penradius,
+          .color = RED
+        };
       }
       
-      circleCount +=1;
-      circles = realloc(circles,sizeof(Circle) * circleCount);
-      circles[circleCount -1] = (Circle) {
-        .id = circleCount -1,
-        .centerX = x,
-        .centerY = y,
-        .radius = penradius,
-        .color = RED
-      };
       prevMouse = curr;
     }
     else if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && tools == PEN){
@@ -165,6 +164,9 @@ int main() {
       circleCount = 0;
       free(circles);
       circles = NULL;
+      BeginTextureMode(target2);
+        ClearBackground(BLACK);
+      EndTextureMode();
     }
 
     
@@ -297,8 +299,8 @@ int main() {
     }
 
     BeginTextureMode(target);
-    ClearBackground(BLACK);
-    DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
+      ClearBackground(BLACK);
+      DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
 
       for(int i = 0; i < shapesCount; i++){
         if(shapes[i].type == SHAPE_LINE) {
@@ -342,7 +344,9 @@ int main() {
     DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
     EndDrawing();
   }
-    
+  
+  UnloadRenderTexture(target); 
+  UnloadRenderTexture(target2); 
   CloseWindow();
     
   return 0;

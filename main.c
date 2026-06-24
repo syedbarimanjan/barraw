@@ -75,6 +75,8 @@ int main() {
   InitWindow(2000, 1000, "Barraw");
   bool mouseWasPressed = false;
   bool mouseIsDown = false;
+  bool isSelected = false;
+  bool isAShapeAlreadySelected = false;
 
   int shapesCount = 0;
   Shape *shapes;
@@ -316,6 +318,23 @@ int main() {
             shapes[i].shape.line.color
           );
 
+          Vector2 mouseDelta = GetMouseDelta();
+          Vector2 currentMousePosition = GetMousePosition();
+
+          Vector2 p1 = (Vector2) {
+            .x = shapes[i].shape.line.startPosX,
+            .y = shapes[i].shape.line.startPosY,
+          };
+
+          Vector2 p2 = (Vector2) {
+            .x = shapes[i].shape.line.endPosX,
+            .y = shapes[i].shape.line.endPosY,
+          };
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointLine(currentMousePosition,p1,p2,10) && tools == SELECTION && isSelected){
+            isSelected = false;
+            break;
+          }
+
           if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             Vector2 mouseDelta = GetMouseDelta();
             Vector2 currentMousePosition = GetMousePosition();
@@ -330,7 +349,8 @@ int main() {
               .y = shapes[i].shape.line.endPosY,
             };
 
-            if(CheckCollisionPointLine(currentMousePosition,p1,p2,1000)){
+            if(CheckCollisionPointLine(currentMousePosition,p1,p2,10)){
+              isSelected = true;
               DrawFPS(10,10);
               DrawLineV(p1,p2,RED);
               DrawCircle(p1.x,p1.y,10,RED);
@@ -342,10 +362,64 @@ int main() {
               shapes[i].shape.line.endPosY += mouseDelta.y;
             }
 
-            if(CheckCollisionPointLine(currentMousePosition,p1,p2,1000) && IsKeyDown(KEY_DELETE)){
+            if(CheckCollisionPointLine(currentMousePosition,p1,p2,10) && IsKeyDown(KEY_DELETE)){
               shapes[i].shape.line = (Line){};
             }
           }
+
+          // todo : dont select all lines when one line is clicked on.
+          if(isSelected){
+            Vector2 p1Up = (Vector2) {
+              .x = shapes[i].shape.line.startPosX - 10,
+              .y = shapes[i].shape.line.startPosY - 10,
+            };
+
+            Vector2 p2Up = (Vector2) {
+              .x = shapes[i].shape.line.endPosX - 10,
+              .y = shapes[i].shape.line.endPosY - 10,
+            };
+
+            Vector2 p1Down = (Vector2) {
+              .x = shapes[i].shape.line.startPosX + 10,
+              .y = shapes[i].shape.line.startPosY + 10,
+            };
+
+            Vector2 p2Down = (Vector2) {
+              .x = shapes[i].shape.line.endPosX + 10,
+              .y = shapes[i].shape.line.endPosY + 10,
+            };
+
+            // Vector2 p1Top = (Vector2) {
+            //   .x = p1Up.x,
+            //   .y = p1Down.x,
+            // };
+
+            // Vector2 p2Top = (Vector2) {
+            //   .x = p1Down.y,
+            //   .y = p1Up.y,
+            // };
+
+            // Rectangle rec = (Rectangle) {
+            //   .x = p1.x,
+            //   .y = p1.y,
+            //   .width = sqrt(((p2.x,p1.x) * (p2.x,p1.x)) + ((p2.y,p1.y) * (p2.y,p1.y))),
+            //   .height = 100,
+            // };
+            // Vector2 origin = (Vector2) {
+            //   .x = (p1.x + p2.x) / 2,
+            //   .y = (p1.y + p2.y) / 2
+            // };
+            // int distance = sqrt(((p2.x,p1.x) * (p2.x,p1.x)) + ((p2.y,p1.y) * (p2.y,p1.y))) / 2;
+
+            // DrawRectanglePro(rec,origin,0,WHITE);
+            // DrawRectangleLines(p1.x,p1.y,sqrt(((p2.x,p1.x) * (p2.x,p1.x)) + ((p2.y,p1.y) * (p2.y,p1.y))),100,WHITE);
+            // DrawPolyLinesEx(origin,4,10,45,2,WHITE);
+            DrawLineDashed(p1Up,p2Up,10,10,WHITE);
+            DrawLineDashed(p1Down,p2Down,10,10,WHITE);
+            DrawLineDashed(p1Up,p1Down,10,10,WHITE);
+            DrawLineDashed(p2Up,p2Down,10,10,WHITE);
+          }
+          
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
           DrawRectangleLines(
             shapes[i].shape.rectangle.x,
@@ -419,14 +493,11 @@ int main() {
             // if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             //   Vector2 mouseDelta = GetMouseDelta();
             //   Vector2 currentMousePosition = GetMousePosition();
-
             //   Vector2 circleCenter = (Vector2) {
             //     .x = shapes[i].shape.freeline.circles[j].centerX,
             //     .y = shapes[i].shape.freeline.circles[j].centerY,
             //   };
-
             //   float circleRadius = shapes[i].shape.freeline.circles[j].radius;
-  
             //   if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
             //     DrawFPS(10,10);
             //     DrawCircleLinesV(circleCenter,circleRadius,WHITE);

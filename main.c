@@ -116,7 +116,7 @@ int main() {
     if (penradius > 50) penradius = 50;
 
     
-    
+    //todd: this is too slow adding so many elements and then moveing them is not good should change the datastruct.
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN) {
       if (!penStarted) {
         prevMouse = curr;
@@ -341,6 +341,10 @@ int main() {
               shapes[i].shape.line.endPosX += mouseDelta.x;
               shapes[i].shape.line.endPosY += mouseDelta.y;
             }
+
+            if(CheckCollisionPointLine(currentMousePosition,p1,p2,1000) && IsKeyDown(KEY_DELETE)){
+              shapes[i].shape.line = (Line){};
+            }
           }
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
           DrawRectangleLines(
@@ -366,6 +370,10 @@ int main() {
               DrawRectangleLinesEx(rec,2.0,RED);
               shapes[i].shape.rectangle.x += mouseDelta.x;
               shapes[i].shape.rectangle.y += mouseDelta.y;
+            }
+
+            if(CheckCollisionPointRec(currentMousePosition,rec) && IsKeyDown(KEY_DELETE)){
+              shapes[i].shape.rectangle = (Rectangled) {};
             }
           }
         } else if(shapes[i].type == SHAPE_CIRCLE) {
@@ -393,6 +401,9 @@ int main() {
               shapes[i].shape.circle.centerX += mouseDelta.x;
               shapes[i].shape.circle.centerY += mouseDelta.y;
             }
+            if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius) && IsKeyDown(KEY_DELETE)){
+              shapes[i].shape.circle = (Circle){};
+            }
           }
         } else if(shapes[i].type == SHAPE_FREELINE) {
           FreeLine line = shapes[i].shape.freeline;
@@ -403,7 +414,28 @@ int main() {
               shapes[i].shape.freeline.circles[j].radius,
               shapes[i].shape.freeline.circles[j].color
             );
+
+            // todo: combine the circle into a single line and the make that line moveable.
+            // if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            //   Vector2 mouseDelta = GetMouseDelta();
+            //   Vector2 currentMousePosition = GetMousePosition();
+
+            //   Vector2 circleCenter = (Vector2) {
+            //     .x = shapes[i].shape.freeline.circles[j].centerX,
+            //     .y = shapes[i].shape.freeline.circles[j].centerY,
+            //   };
+
+            //   float circleRadius = shapes[i].shape.freeline.circles[j].radius;
+  
+            //   if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
+            //     DrawFPS(10,10);
+            //     DrawCircleLinesV(circleCenter,circleRadius,WHITE);
+            //     shapes[i].shape.freeline.circles[j].centerX += mouseDelta.x;
+            //     shapes[i].shape.freeline.circles[j].centerY += mouseDelta.y;
+            //   }
+            // }
           }
+
         }
         
         
@@ -416,8 +448,8 @@ int main() {
     EndDrawing();
   }
   
-  // UnloadRenderTexture(target); 
-  // UnloadRenderTexture(target2); 
+  UnloadRenderTexture(target); 
+  UnloadRenderTexture(target2); 
   CloseWindow();
     
   return 0;

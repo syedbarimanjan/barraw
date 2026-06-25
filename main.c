@@ -11,6 +11,7 @@ typedef struct {
   float width;
   float height;
   Color color;
+  bool isSelected;
 } Rectangled;
 
 typedef struct {
@@ -19,6 +20,7 @@ typedef struct {
   int centerY;
   float radius;
   Color color;
+  bool isSelected;
 } Circle;
 
 
@@ -76,8 +78,6 @@ int main() {
   InitWindow(2000, 1000, "Barraw");
   bool mouseWasPressed = false;
   bool mouseIsDown = false;
-  bool isSelected = false;
-  bool isAShapeAlreadySelected = false;
 
   int shapesCount = 0;
   Shape *shapes;
@@ -245,6 +245,7 @@ int main() {
         .width = a.x-pm.x,
         .height = a.y-pm.y,
         .id = shapesCount -1,
+        .isSelected = true,
       }; 
 
       BeginTextureMode(target2);
@@ -291,7 +292,8 @@ int main() {
         .centerX = (pm.x+a.x)/2,
         .centerY = (pm.y+a.y)/2,
         .radius = radius/2,
-        .color = PINK
+        .color = PINK,
+        .isSelected = true,
       };
 
       BeginTextureMode(target2);
@@ -370,30 +372,30 @@ int main() {
           }
 
           if(shapes[i].shape.line.isSelected){
-            Vector2 p1Up = (Vector2) {
+            Vector2 point1UpLine = (Vector2) {
               .x = shapes[i].shape.line.startPosX - 10,
               .y = shapes[i].shape.line.startPosY - 10,
             };
 
-            Vector2 p2Up = (Vector2) {
+            Vector2 p2UpLine = (Vector2) {
               .x = shapes[i].shape.line.endPosX - 10,
               .y = shapes[i].shape.line.endPosY - 10,
             };
 
-            Vector2 p1Down = (Vector2) {
+            Vector2 point1DownLine = (Vector2) {
               .x = shapes[i].shape.line.startPosX + 10,
               .y = shapes[i].shape.line.startPosY + 10,
             };
 
-            Vector2 p2Down = (Vector2) {
+            Vector2 point2DownLine = (Vector2) {
               .x = shapes[i].shape.line.endPosX + 10,
               .y = shapes[i].shape.line.endPosY + 10,
             };
 
-            DrawLineDashed(p1Up,p2Up,10,10,WHITE);
-            DrawLineDashed(p1Down,p2Down,10,10,WHITE);
-            DrawLineDashed(p1Up,p1Down,10,10,WHITE);
-            DrawLineDashed(p2Up,p2Down,10,10,WHITE);
+            DrawLineDashed(point1UpLine,p2UpLine,10,10,WHITE);
+            DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
+            DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
+            DrawLineDashed(p2UpLine,point2DownLine,10,10,WHITE);
           }
           
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
@@ -416,6 +418,7 @@ int main() {
               .height =shapes[i].shape.rectangle.height,
             };
             if(CheckCollisionPointRec(currentMousePosition,rec)){
+              shapes[i].shape.rectangle.isSelected = true;
               DrawFPS(10,10);
               DrawRectangleLinesEx(rec,2.0,RED);
               shapes[i].shape.rectangle.x += mouseDelta.x;
@@ -425,6 +428,60 @@ int main() {
             if(CheckCollisionPointRec(currentMousePosition,rec) && IsKeyDown(KEY_DELETE)){
               shapes[i].shape.rectangle = (Rectangled) {};
             }
+          }
+
+          if(shapes[i].shape.rectangle.isSelected){
+            // Rectangle rec = (Rectangle) {
+            //   .x =shapes[i].shape.rectangle.x - 10,
+            //   .y =shapes[i].shape.rectangle.y - 10,
+            //   .width =shapes[i].shape.rectangle.width + 20,
+            //   .height =shapes[i].shape.rectangle.height + 20,
+            // };
+
+            
+            Vector2 point1UpLine = (Vector2) {
+              .x = shapes[i].shape.rectangle.x - 10,
+              .y = shapes[i].shape.rectangle.y - 10,
+            };
+            Vector2 point2UpLine = (Vector2) {
+              .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width + 10,
+              .y = shapes[i].shape.rectangle.y - 10,
+            };
+            
+            Vector2 point1DownLine = (Vector2) {
+              .x = shapes[i].shape.rectangle.x - 10,
+              .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height + 10,
+            };
+            Vector2 point2DownLine = (Vector2) {
+              .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width + 10,
+              .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height + 10,
+            };
+            
+            Vector2 point1UpLineNormal = (Vector2) {
+              .x = shapes[i].shape.rectangle.x,
+              .y = shapes[i].shape.rectangle.y,
+            };
+            Vector2 point2UpLineNormal = (Vector2) {
+              .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width,
+              .y = shapes[i].shape.rectangle.y,
+            };
+            Vector2 point1DownLineNormal = (Vector2) {
+              .x = shapes[i].shape.rectangle.x,
+              .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height,
+            };
+            Vector2 point2DownLineNormal = (Vector2) {
+              .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width,
+              .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height,
+            };
+            // todo:: check if lines collide and then change the modification(+- 10) of the lines so that selection bounding box is drawn properly.
+            if(CheckCollisionLines(point1UpLine,point2UpLine,point1UpLineNormal,point1DownLineNormal,&point1UpLine)){
+              DrawFPS(10,10);
+            }
+            
+            DrawLineDashed(point1UpLine,point2UpLine,10,10,WHITE);
+            DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
+            DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
+            DrawLineDashed(point2UpLine,point2DownLine,10,10,WHITE);
           }
         } else if(shapes[i].type == SHAPE_CIRCLE) {
           DrawCircleLines(

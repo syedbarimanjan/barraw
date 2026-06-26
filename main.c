@@ -473,15 +473,88 @@ int main() {
               .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width,
               .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height,
             };
-            // todo:: check if lines collide and then change the modification(+- 10) of the lines so that selection bounding box is drawn properly.
+            // todo:: improve this mess.
             if(CheckCollisionLines(point1UpLine,point2UpLine,point1UpLineNormal,point1DownLineNormal,&point1UpLine)){
               DrawFPS(10,10);
+              Vector2 point1UpLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x - 10,
+                .y = shapes[i].shape.rectangle.y + 10,
+              };
+              Vector2 point2UpLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width + 10,
+                .y = shapes[i].shape.rectangle.y + 10,
+              };
+              
+              Vector2 point1DownLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x - 10,
+                .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
+              };
+              Vector2 point2DownLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width + 10,
+                .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
+              };
+              DrawLineDashed(point1UpLine1,point2UpLine1,10,10,GREEN);
+              DrawLineDashed(point1DownLine1,point2DownLine1,10,10,GREEN);
+              DrawLineDashed(point1UpLine1,point1DownLine1,10,10,GREEN);
+              DrawLineDashed(point2UpLine1,point2DownLine1,10,10,GREEN);
             }
-            
-            DrawLineDashed(point1UpLine,point2UpLine,10,10,WHITE);
-            DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
-            DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
-            DrawLineDashed(point2UpLine,point2DownLine,10,10,WHITE);
+            else if(CheckCollisionLines(point1UpLine,point1DownLine,point1DownLineNormal,point2DownLineNormal,&point2DownLine)){
+              DrawFPS(100,100);
+              Vector2 point1UpLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + 10,
+                .y = shapes[i].shape.rectangle.y - 10,
+              };
+              Vector2 point2UpLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
+                .y = shapes[i].shape.rectangle.y - 10,
+              };
+              
+              Vector2 point1DownLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + 10,
+                .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height + 10,
+              };
+              Vector2 point2DownLine1 = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
+                .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height + 10,
+              };
+              DrawLineDashed(point1UpLine1,point2UpLine1,10,10,GREEN);
+              DrawLineDashed(point1DownLine1,point2DownLine1,10,10,GREEN);
+              DrawLineDashed(point1UpLine1,point1DownLine1,10,10,GREEN);
+              DrawLineDashed(point2UpLine1,point2DownLine1,10,10,GREEN);
+            }
+            else if(CheckCollisionLines(point1UpLine,point1DownLine,point1DownLineNormal,point2DownLineNormal,&point2DownLine)){
+              DrawFPS(300,300);
+
+              Vector2 point1UpLine = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + 10,
+                .y = shapes[i].shape.rectangle.y + 10,
+              };
+              Vector2 point2UpLine = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
+                .y = shapes[i].shape.rectangle.y + 10,
+              };
+              
+              Vector2 point1DownLine = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + 10,
+                .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
+              };
+              Vector2 point2DownLine = (Vector2) {
+                .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
+                .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
+              };
+
+              DrawLineDashed(point1UpLine,point2UpLine,10,10,GREEN);
+              DrawLineDashed(point1DownLine,point2DownLine,10,10,GREEN);
+              DrawLineDashed(point1UpLine,point1DownLine,10,10,GREEN);
+              DrawLineDashed(point2UpLine,point2DownLine,10,10,GREEN);
+            } else {
+              DrawFPS(500,10);
+              DrawLineDashed(point1UpLine,point2UpLine,10,10,WHITE);
+              DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
+              DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
+              DrawLineDashed(point2UpLine,point2DownLine,10,10,WHITE);
+            }
+
           }
         } else if(shapes[i].type == SHAPE_CIRCLE) {
           DrawCircleLines(

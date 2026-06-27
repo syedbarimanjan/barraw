@@ -433,99 +433,20 @@ int main() {
             }
           }
 
+          Vector2 currentMousePosition = GetMousePosition();
+          Rectangle rec = (Rectangle) {
+            .x =shapes[i].shape.rectangle.x,
+            .y =shapes[i].shape.rectangle.y,
+            .width =shapes[i].shape.rectangle.width,
+            .height =shapes[i].shape.rectangle.height,
+          };
+
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
+            shapes[i].shape.line.isSelected = false;
+          }
+
           if(shapes[i].shape.rectangle.isSelected){
-            
-            // Vector2 p1 = (Vector2) {
-            //   .x = center.x-(shapes[i].shape.rectangle.width/2) - 10,
-            //   .y = center.y-(shapes[i].shape.rectangle.height/2)  - 10,
-            // };
-            // Vector2 p2 = (Vector2) {
-            //   .x = center.x+(shapes[i].shape.rectangle.width/2) + 10,
-            //   .y = center.y-(shapes[i].shape.rectangle.height/2) - 10,
-            // };
-            // DrawLineDashed(p1,p2,2,2,RED);
-            // // todo:: improve this mess.
-            // if(point1UpLineNormal.x - point1UpLine.x > 0 && point1UpLine.y - point1UpLineNormal.y < 0){
-            //   DrawFPS(10,10);
-            //   Vector2 point1UpLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x - 10,
-            //     .y = shapes[i].shape.rectangle.y + 10,
-            //   };
-            //   Vector2 point2UpLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width + 10,
-            //     .y = shapes[i].shape.rectangle.y + 10,
-            //   };
-            //   Vector2 point1DownLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x - 10,
-            //     .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
-            //   };
-            //   Vector2 point2DownLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width + 10,
-            //     .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
-            //   };
-            //   DrawLineDashed(point1UpLine1,point2UpLine1,10,10,PINK);
-            //   DrawLineDashed(point1DownLine1,point2DownLine1,10,10,PINK);
-            //   DrawLineDashed(point1UpLine1,point1DownLine1,10,10,PINK);
-            //   DrawLineDashed(point2UpLine1,point2DownLine1,10,10,PINK);
-            // }
-            // else if(CheckCollisionLines(point1UpLine,point1DownLine,point1DownLineNormal,point2DownLineNormal,&point2DownLine)){
-            //   DrawFPS(100,100);
-            //   Vector2 point1UpLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + 10,
-            //     .y = shapes[i].shape.rectangle.y - 10,
-            //   };
-            //   Vector2 point2UpLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
-            //     .y = shapes[i].shape.rectangle.y - 10,
-            //   };
-            //   Vector2 point1DownLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + 10,
-            //     .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height + 10,
-            //   };
-            //   Vector2 point2DownLine1 = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
-            //     .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height + 10,
-            //   };
-            //   DrawLineDashed(point1UpLine1,point2UpLine1,10,10,GREEN);
-            //   DrawLineDashed(point1DownLine1,point2DownLine1,10,10,GREEN);
-            //   DrawLineDashed(point1UpLine1,point1DownLine1,10,10,GREEN);
-            //   DrawLineDashed(point2UpLine1,point2DownLine1,10,10,GREEN);
-            // }
-            // else if(CheckCollisionLines(point1UpLine,point1DownLine,point1DownLineNormal,point2DownLineNormal,&point2DownLine)){
-            //   DrawFPS(300,300);
-            //   Vector2 point1UpLine = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + 10,
-            //     .y = shapes[i].shape.rectangle.y + 10,
-            //   };
-            //   Vector2 point2UpLine = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
-            //     .y = shapes[i].shape.rectangle.y + 10,
-            //   };
-            //   Vector2 point1DownLine = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + 10,
-            //     .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
-            //   };
-            //   Vector2 point2DownLine = (Vector2) {
-            //     .x = shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width - 10,
-            //     .y = shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height - 10,
-            //   };
-            //   DrawLineDashed(point1UpLine,point2UpLine,10,10,ORANGE);
-            //   DrawLineDashed(point1DownLine,point2DownLine,10,10,ORANGE);
-            //   DrawLineDashed(point1UpLine,point1DownLine,10,10,ORANGE);
-            //   DrawLineDashed(point2UpLine,point2DownLine,10,10,ORANGE);
-            // } else {
-            //   DrawFPS(500,10);
-            //   // printf("%d",shapes[i].shape.rectangle.width);
-            //   DrawLineDashed(point1UpLine,point2UpLine,10,10,WHITE);
-            //   DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
-            //   DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
-            //   DrawLineDashed(point2UpLine,point2DownLine,10,10,WHITE);
-            // }
-
-
             // (left, top)    =============== (right, top)
-            //       |                             |
-            //       |                             |
             //       |                             |
             // (left, bottom) =============== (right, bottom)
             float left = fminf(shapes[i].shape.rectangle.x,shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width);

@@ -442,7 +442,7 @@ int main() {
           };
 
           if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
-            shapes[i].shape.line.isSelected = false;
+            shapes[i].shape.rectangle.isSelected = false;
           }
 
           if(shapes[i].shape.rectangle.isSelected){
@@ -503,6 +503,7 @@ int main() {
             float circleRadius = shapes[i].shape.circle.radius;
 
             if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
+              shapes[i].shape.circle.isSelected = true;
               DrawFPS(10,10);
               DrawCircleLinesV(circleCenter,circleRadius,RED);
               shapes[i].shape.circle.centerX += mouseDelta.x;
@@ -510,6 +511,47 @@ int main() {
             }
             if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius) && IsKeyDown(KEY_DELETE)){
               shapes[i].shape.circle = (Circle){};
+            }
+          }
+
+          Vector2 currentMousePosition = GetMousePosition();
+          Vector2 circleCenter = (Vector2) {
+            .x = shapes[i].shape.circle.centerX,
+            .y = shapes[i].shape.circle.centerY,
+          };
+          float circleRadius = shapes[i].shape.circle.radius;
+
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
+            shapes[i].shape.circle.isSelected = false;
+          };
+
+          if(shapes[i].shape.circle.isSelected){
+            // todo: use better dash calculating trignometry 
+            int segments = 360;
+            int segmentsToDraw = 3;
+            int segmentsToSkip = 2;
+
+            float angleSlice = (2.0f * PI) / segments;
+            int counter = 0;
+
+            for(int j = 0; j < segments; j++){
+              float angle1 = j * angleSlice;
+              float angle2 = (j +1) *angleSlice;
+
+              float x1 = circleCenter.x + cosf(angle1) * (circleRadius + 10);
+              float y1 = circleCenter.y + sinf(angle1) * (circleRadius + 10);
+
+              float x2 = circleCenter.x + cosf(angle2) * (circleRadius + 10);
+              float y2 = circleCenter.y + sinf(angle2) * (circleRadius + 10);
+
+              if(counter < segmentsToDraw){
+                DrawLine(x1,y1,x2,y2,WHITE);
+              }
+
+              counter++;
+              if(counter >= segmentsToDraw + segmentsToSkip){
+                counter = 0;
+              }
             }
           }
         } else if(shapes[i].type == SHAPE_FREELINE) {

@@ -86,6 +86,10 @@ int main() {
   Shape *shapes;
   shapes = malloc(sizeof(Shape) * shapesCount);
 
+  int copiedShapesCount = 0;
+  Shape *copiedShapes;
+  copiedShapes = malloc(sizeof(Shape) * copiedShapesCount);
+
   int circleCount = 0;
   Circle *circles;
   circles = malloc(sizeof(Circle) * circleCount);
@@ -161,7 +165,7 @@ int main() {
       shapesCount += 1;
       shapes = realloc(shapes,sizeof(Shape) * shapesCount);
 
-      Circle *circlesCopy = malloc(sizeof(Circle) *circleCount);
+      Circle *circlesCopy = malloc(sizeof(Circle) * circleCount);
       for(int i = 0; i < circleCount; i++){
         circlesCopy[i] = circles[i];
       }
@@ -401,6 +405,22 @@ int main() {
             DrawLineDashed(p2UpLine,point2DownLine,10,10,WHITE);
           }
           
+          if(shapes[i].shape.line.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
+            copiedShapesCount+=1;
+            copiedShapes = realloc(copiedShapes,sizeof(Shape) * copiedShapesCount);
+      
+            Line modLine = (Line){
+              .startPosX = shapes[i].shape.line.startPosX + 10,
+              .startPosY = shapes[i].shape.line.startPosY + 10,
+              .endPosX = shapes[i].shape.line.endPosX + 10,
+              .endPosY = shapes[i].shape.line.endPosY + 10,
+              .color = shapes[i].shape.line.color,
+              .isSelected = true,
+            };
+            copiedShapes[copiedShapesCount - 1].type = SHAPE_LINE;
+            copiedShapes[copiedShapesCount - 1].shape.line = modLine;
+            tools = SELECTION;
+          }
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
           DrawRectangleLines(
             shapes[i].shape.rectangle.x,
@@ -483,6 +503,23 @@ int main() {
             DrawLineDashed(point2DownLine,point2UpLine,10,10,WHITE);
             DrawLineDashed(point1DownLine,point1UpLine,10,10,WHITE);
           }
+
+          if(shapes[i].shape.rectangle.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
+            copiedShapesCount+=1;
+            copiedShapes = realloc(copiedShapes,sizeof(Shape) * copiedShapesCount);
+      
+            Rectangled modifiedRectangle = (Rectangled){
+              .x = shapes[i].shape.rectangle.x + 10,
+              .y = shapes[i].shape.rectangle.y + 10,
+              .width = shapes[i].shape.rectangle.width,
+              .height = shapes[i].shape.rectangle.height,
+              .color = shapes[i].shape.rectangle.color,
+              .isSelected = true
+            };
+            copiedShapes[copiedShapesCount - 1].type = SHAPE_RECTANGLE;
+            copiedShapes[copiedShapesCount - 1].shape.rectangle = modifiedRectangle;
+            tools = SELECTION;
+          }
         } else if(shapes[i].type == SHAPE_CIRCLE) {
           DrawCircleLines(
             shapes[i].shape.circle.centerX,
@@ -554,6 +591,22 @@ int main() {
               }
             }
           }
+
+          if(shapes[i].shape.circle.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
+            copiedShapesCount+=1;
+            copiedShapes = realloc(copiedShapes,sizeof(Shape) * copiedShapesCount);
+      
+            Circle modifiedCircle = (Circle){
+              .centerX = shapes[i].shape.circle.centerX + 10,
+              .centerY = shapes[i].shape.circle.centerY + 10,
+              .radius = shapes[i].shape.circle.radius,
+              .color = shapes[i].shape.circle.color,
+              .isSelected = true
+            };
+            copiedShapes[copiedShapesCount - 1].type = SHAPE_CIRCLE;
+            copiedShapes[copiedShapesCount - 1].shape.circle = modifiedCircle;
+            tools = SELECTION;
+          }
         } else if(shapes[i].type == SHAPE_FREELINE) {
           FreeLine line = shapes[i].shape.freeline;
           for(int j = 0; j < line.circlesCount; j++){
@@ -585,6 +638,20 @@ int main() {
         }
         
         
+      }
+
+      if(copiedShapesCount > 0){
+        int oldShapesCount = shapesCount;
+        shapesCount += copiedShapesCount;
+        shapes = realloc(shapes,sizeof(Shape) * shapesCount);
+
+        for(int i = 0; i < copiedShapesCount; i++){
+          shapes[oldShapesCount + i] = copiedShapes[i];
+        }
+        
+        copiedShapesCount = 0;
+        free(copiedShapes);
+        copiedShapes = NULL;
       }
     EndTextureMode();
 

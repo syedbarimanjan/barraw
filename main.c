@@ -1,6 +1,5 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
 
 #include <raylib.h>
@@ -631,33 +630,30 @@ int main() {
           };
 
           if(shapes[i].shape.circle.isSelected){
-            // todo: use better dash calculating trignometry
-            int segments = 360;
-            int segmentsToDraw = 3;
-            int segmentsToSkip = 2;
+            Vector2 circleTopLeft = (Vector2) {
+              .x = shapes[i].shape.circle.centerX - shapes[i].shape.circle.radius - 10,
+              .y = shapes[i].shape.circle.centerY - shapes[i].shape.circle.radius - 10,
+            };
 
-            float angleSlice = (2.0f * PI) / segments;
-            int counter = 0;
+            Vector2 circleTopRight = (Vector2) {
+              .x = shapes[i].shape.circle.centerX + shapes[i].shape.circle.radius + 10,
+              .y = shapes[i].shape.circle.centerY - shapes[i].shape.circle.radius - 10,
+            };
 
-            for(int j = 0; j < segments; j++){
-              float angle1 = j * angleSlice;
-              float angle2 = (j +1) *angleSlice;
+            Vector2 circleBottomRight = (Vector2) {
+              .x = shapes[i].shape.circle.centerX + shapes[i].shape.circle.radius + 10,
+              .y = shapes[i].shape.circle.centerY + shapes[i].shape.circle.radius + 10,
+            };
 
-              float x1 = circleCenter.x + cosf(angle1) * (circleRadius + 10);
-              float y1 = circleCenter.y + sinf(angle1) * (circleRadius + 10);
+            Vector2 circleBottomLeft = (Vector2) {
+              .x = shapes[i].shape.circle.centerX - shapes[i].shape.circle.radius - 10,
+              .y = shapes[i].shape.circle.centerY + shapes[i].shape.circle.radius + 10,
+            };
 
-              float x2 = circleCenter.x + cosf(angle2) * (circleRadius + 10);
-              float y2 = circleCenter.y + sinf(angle2) * (circleRadius + 10);
-
-              if(counter < segmentsToDraw){
-                DrawLine(x1,y1,x2,y2,WHITE);
-              }
-
-              counter++;
-              if(counter >= segmentsToDraw + segmentsToSkip){
-                counter = 0;
-              }
-            }
+            DrawLineDashed(circleTopLeft, circleTopRight, 10, 10, WHITE);
+            DrawLineDashed(circleBottomLeft, circleBottomRight, 10, 10, WHITE);
+            DrawLineDashed(circleTopLeft, circleBottomLeft, 10, 10, WHITE);
+            DrawLineDashed(circleTopRight, circleBottomRight, 10, 10, WHITE);
           }
 
           if(shapes[i].shape.circle.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){

@@ -474,15 +474,15 @@ int main() {
 
           Vector2 currentMousePosition = GetMousePosition();
           Rectangle rec = (Rectangle) {
-            .x =shapes[i].shape.rectangle.x,
-            .y =shapes[i].shape.rectangle.y,
-            .width =shapes[i].shape.rectangle.width,
-            .height =shapes[i].shape.rectangle.height,
+            .x =shapes[i].shape.rectangle.x - 10,
+            .y =shapes[i].shape.rectangle.y - 10,
+            .width =shapes[i].shape.rectangle.width + 20,
+            .height =shapes[i].shape.rectangle.height + 20,
           };
 
-          // if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
-          //   shapes[i].shape.rectangle.isSelected = false;
-          // }
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
+            shapes[i].shape.rectangle.isSelected = false;
+          }
 
           if(shapes[i].shape.rectangle.isSelected){
             // (left, top)    =============== (right, top)

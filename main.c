@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -30,7 +31,7 @@ typedef struct {
 typedef struct {
   int id;
   int startPosX;
-  int startPosY; 
+  int startPosY;
   int endPosX;
   int endPosY;
   Color color;
@@ -94,15 +95,15 @@ int main() {
   Circle *circles;
   circles = malloc(sizeof(Circle) * circleCount);
 
-  
+
   RenderTexture2D target = LoadRenderTexture(2000,1000);
   RenderTexture2D target2 = LoadRenderTexture(2000,1000);
-  
+
   Vector2 prevMouse = {0};
   bool penStarted = false;
   Vector2 pm = {0};
   Vector2 a;
-  
+
   float penradius = 1.0f;
   tools= PEN;
   while(!WindowShouldClose()) {
@@ -125,14 +126,14 @@ int main() {
     if (penradius < 2) penradius = 2;
     if (penradius > 50) penradius = 50;
 
-    
+
     //todo: this is too slow adding so many elements and then moveing them is not good should change the datastruct.
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == PEN) {
       if (!penStarted) {
         prevMouse = curr;
         penStarted = true;
       }
-      
+
       float dx = curr.x - prevMouse.x;
       float dy = curr.y - prevMouse.y;
       float dist = sqrt(dx*dx + dy*dy);
@@ -157,7 +158,7 @@ int main() {
           .color = RED
         };
       }
-      
+
       prevMouse = curr;
     }
     else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == PEN){
@@ -169,7 +170,7 @@ int main() {
       for(int i = 0; i < circleCount; i++){
         circlesCopy[i] = circles[i];
       }
-      
+
       shapes[shapesCount - 1].type = SHAPE_FREELINE;
       shapes[shapesCount - 1].shape.freeline = (FreeLine) {
         .id = shapesCount -1,
@@ -183,7 +184,7 @@ int main() {
         ClearBackground(BLACK);
       EndTextureMode();
     }
-    
+
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == LINE) {
       if(!mouseIsDown){
         a=GetMousePosition();
@@ -191,21 +192,22 @@ int main() {
         mouseIsDown = true;
         continue;
       }
-      
-      
+
+
       a=GetMousePosition();
       int x= GetMouseX();
       int y= GetMouseY();
-      
+
       BeginTextureMode(target2);
         ClearBackground(BLACK);
         DrawLine(pm.x,pm.y,a.x,a.y,GREEN);
       EndTextureMode();
-    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == LINE) {
+    }
+    else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == LINE) {
       mouseIsDown = false;
       shapesCount+=1;
       shapes = realloc(shapes,sizeof(Shape) * shapesCount);
-      
+
       shapes[shapesCount - 1].type = SHAPE_LINE;
       shapes[shapesCount - 1].shape.line = (Line) {
         .color = GREEN,
@@ -229,7 +231,7 @@ int main() {
         mouseIsDown = true;
         continue;
       }
-      
+
       a=GetMousePosition();
       int x= GetMouseX();
       int y= GetMouseY();
@@ -243,7 +245,7 @@ int main() {
       mouseIsDown = false;
       shapesCount+=1;
       shapes = realloc(shapes,sizeof(Shape) * shapesCount);
-      
+
       shapes[shapesCount - 1].type = SHAPE_RECTANGLE;
       shapes[shapesCount - 1].shape.rectangle = (Rectangled) {
         .color = BLUE,
@@ -253,7 +255,7 @@ int main() {
         .height = a.y-pm.y,
         .id = shapesCount -1,
         .isSelected = true,
-      }; 
+      };
 
       BeginTextureMode(target2);
         ClearBackground(BLACK);
@@ -267,8 +269,8 @@ int main() {
         mouseIsDown = true;
         continue;
       }
-      
-      
+
+
       a=GetMousePosition();
       int x= GetMouseX();
       int y= GetMouseY();
@@ -281,7 +283,8 @@ int main() {
         ClearBackground(BLACK);
         DrawCircleLines((pm.x+a.x)/2,(pm.y+a.y)/2,radius/2,PINK);
       EndTextureMode();
-    } else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == CIRCLE) {
+    }
+    else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == CIRCLE) {
       mouseIsDown = false;
       int x= GetMouseX();
       int y= GetMouseY();
@@ -292,7 +295,7 @@ int main() {
 
       shapesCount+=1;
       shapes = realloc(shapes,sizeof(Shape) * shapesCount);
-      
+
       shapes[shapesCount - 1].type = SHAPE_CIRCLE;
       shapes[shapesCount - 1].shape.circle = (Circle) {
         .id = shapesCount -1,
@@ -306,9 +309,9 @@ int main() {
       BeginTextureMode(target2);
         ClearBackground(BLACK);
       EndTextureMode();
-      
+
     }
-    
+
     if(IsKeyPressed(KEY_A)){
       free(shapes);
       shapes = NULL;
@@ -341,10 +344,11 @@ int main() {
             .x = shapes[i].shape.line.endPosX,
             .y = shapes[i].shape.line.endPosY,
           };
-          
+
           if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointLine(currentMousePosition,p1,p2,10)){
             shapes[i].shape.line.isSelected = false;
           }
+
 
           if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             Vector2 mouseDelta = GetMouseDelta();
@@ -360,7 +364,7 @@ int main() {
               .y = shapes[i].shape.line.endPosY,
             };
 
-            if(CheckCollisionPointLine(currentMousePosition,p1,p2,10)){
+            if(CheckCollisionPointLine(currentMousePosition,p1,p2,5)){
               shapes[i].shape.line.isSelected = true;
               DrawFPS(10,10);
               DrawLineV(p1,p2,RED);
@@ -377,7 +381,7 @@ int main() {
               shapes[i].shape.line = (Line){};
             }
           }
-
+          // todo: diagonol lines bounding box is squinted.
           if(shapes[i].shape.line.isSelected){
             Vector2 point1UpLine = (Vector2) {
               .x = shapes[i].shape.line.startPosX - 10,
@@ -404,11 +408,11 @@ int main() {
             DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
             DrawLineDashed(p2UpLine,point2DownLine,10,10,WHITE);
           }
-          
+
           if(shapes[i].shape.line.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
             copiedShapesCount+=1;
             copiedShapes = realloc(copiedShapes,sizeof(Shape) * copiedShapesCount);
-      
+
             Line modLine = (Line){
               .startPosX = shapes[i].shape.line.startPosX + 10,
               .startPosY = shapes[i].shape.line.startPosY + 10,
@@ -421,6 +425,22 @@ int main() {
             copiedShapes[copiedShapesCount - 1].shape.line = modLine;
             tools = SELECTION;
           }
+
+          if(CheckCollisionCircles(p1,10,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.line.isSelected = false;
+            DrawFPS(10,100);
+            DrawCircleV(p1,10,RED);
+            shapes[i].shape.line.startPosX += mouseDelta.x;
+            shapes[i].shape.line.startPosY += mouseDelta.y;
+          }
+          else if (CheckCollisionCircles(p2,10,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+              shapes[i].shape.line.isSelected = false;
+              DrawFPS(10,100);
+              DrawCircleV(p2,10,RED);
+              shapes[i].shape.line.endPosX += mouseDelta.x;
+              shapes[i].shape.line.endPosY += mouseDelta.y;
+          }
+
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
           DrawRectangleLines(
             shapes[i].shape.rectangle.x,
@@ -461,9 +481,9 @@ int main() {
             .height =shapes[i].shape.rectangle.height,
           };
 
-          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
-            shapes[i].shape.rectangle.isSelected = false;
-          }
+          // if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
+          //   shapes[i].shape.rectangle.isSelected = false;
+          // }
 
           if(shapes[i].shape.rectangle.isSelected){
             // (left, top)    =============== (right, top)
@@ -497,7 +517,7 @@ int main() {
               .y = (top + bottom) / 2
             };
             DrawCircle(center.x,center.y,5,WHITE);
-            
+
             DrawLineDashed(point1UpLine,point2UpLine,10,10,WHITE);
             DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
             DrawLineDashed(point2DownLine,point2UpLine,10,10,WHITE);
@@ -507,7 +527,7 @@ int main() {
           if(shapes[i].shape.rectangle.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
             copiedShapesCount+=1;
             copiedShapes = realloc(copiedShapes,sizeof(Shape) * copiedShapesCount);
-      
+
             Rectangled modifiedRectangle = (Rectangled){
               .x = shapes[i].shape.rectangle.x + 10,
               .y = shapes[i].shape.rectangle.y + 10,
@@ -520,6 +540,54 @@ int main() {
             copiedShapes[copiedShapesCount - 1].shape.rectangle = modifiedRectangle;
             tools = SELECTION;
           }
+
+          float left = fminf(shapes[i].shape.rectangle.x,shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width);
+          float right = fmaxf(shapes[i].shape.rectangle.x,shapes[i].shape.rectangle.x + shapes[i].shape.rectangle.width);
+
+          float top = fminf(shapes[i].shape.rectangle.y,shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height);
+          float bottom = fmaxf(shapes[i].shape.rectangle.y,shapes[i].shape.rectangle.y + shapes[i].shape.rectangle.height);
+
+          Vector2 point1UpLine = (Vector2) {
+            .x = left - 10,
+            .y = top - 10,
+          };
+          Vector2 point2UpLine = (Vector2) {
+            .x = right + 10,
+            .y = top - 10,
+          };
+          Vector2 point1DownLine = (Vector2) {
+            .x = left - 10,
+            .y = bottom + 10,
+          };
+          Vector2 point2DownLine = (Vector2) {
+            .x = right + 10,
+            .y = bottom + 10,
+          };
+
+          Vector2 mouseDelta = GetMouseDelta();
+          if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point1UpLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.rectangle.isSelected = true;
+            DrawLineDashed(point1UpLine,point2UpLine,10,10,RED);
+            shapes[i].shape.rectangle.y += mouseDelta.y;
+            shapes[i].shape.rectangle.height -= mouseDelta.y;
+          }
+          else if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point2DownLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.rectangle.isSelected = true;
+            DrawLineDashed(point1DownLine,point2DownLine,10,10,RED);
+            shapes[i].shape.rectangle.height += mouseDelta.y;
+          }
+          else if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point2DownLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.rectangle.isSelected = true;
+            DrawLineDashed(point2DownLine,point2UpLine,10,10,RED);
+            shapes[i].shape.rectangle.width += mouseDelta.x;
+          }
+          else if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point1UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.rectangle.isSelected = true;
+            DrawLineDashed(point1DownLine,point1UpLine,10,10,RED);
+            shapes[i].shape.rectangle.x += mouseDelta.x;
+            shapes[i].shape.rectangle.width -= mouseDelta.x;
+          }
+
         } else if(shapes[i].type == SHAPE_CIRCLE) {
           DrawCircleLines(
             shapes[i].shape.circle.centerX,
@@ -563,7 +631,7 @@ int main() {
           };
 
           if(shapes[i].shape.circle.isSelected){
-            // todo: use better dash calculating trignometry 
+            // todo: use better dash calculating trignometry
             int segments = 360;
             int segmentsToDraw = 3;
             int segmentsToSkip = 2;
@@ -595,7 +663,7 @@ int main() {
           if(shapes[i].shape.circle.isSelected && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_C)){
             copiedShapesCount+=1;
             copiedShapes = realloc(copiedShapes,sizeof(Shape) * copiedShapesCount);
-      
+
             Circle modifiedCircle = (Circle){
               .centerX = shapes[i].shape.circle.centerX + 10,
               .centerY = shapes[i].shape.circle.centerY + 10,
@@ -607,6 +675,15 @@ int main() {
             copiedShapes[copiedShapesCount - 1].shape.circle = modifiedCircle;
             tools = SELECTION;
           }
+
+          // Vector2 mouseDelta = GetMouseDelta();
+          // if(shapes[i].shape.rectangle.isSelected && CheckCollisionCircles(circleCenter,circleRadius,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+          //   shapes[i].shape.rectangle.isSelected = true;
+          //   DrawFPS(10, 100);
+          //   shapes[i].shape.circle.centerX += mouseDelta.x;
+          //   // shapes[i].shape.rectangle.height -= mouseDelta.y;
+          // }
+
         } else if(shapes[i].type == SHAPE_FREELINE) {
           FreeLine line = shapes[i].shape.freeline;
           for(int j = 0; j < line.circlesCount; j++){
@@ -636,8 +713,8 @@ int main() {
           }
 
         }
-        
-        
+
+
       }
 
       if(copiedShapesCount > 0){
@@ -648,7 +725,7 @@ int main() {
         for(int i = 0; i < copiedShapesCount; i++){
           shapes[oldShapesCount + i] = copiedShapes[i];
         }
-        
+
         copiedShapesCount = 0;
         free(copiedShapes);
         copiedShapes = NULL;
@@ -660,10 +737,10 @@ int main() {
     DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
     EndDrawing();
   }
-  
-  UnloadRenderTexture(target); 
-  UnloadRenderTexture(target2); 
+
+  UnloadRenderTexture(target);
+  UnloadRenderTexture(target2);
   CloseWindow();
-    
+
   return 0;
 }

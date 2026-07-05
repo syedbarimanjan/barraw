@@ -625,10 +625,6 @@ int main() {
           };
           float circleRadius = shapes[i].shape.circle.radius;
 
-          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
-            shapes[i].shape.circle.isSelected = false;
-          };
-
           if(shapes[i].shape.circle.isSelected){
             Vector2 circleTopLeft = (Vector2) {
               .x = shapes[i].shape.circle.centerX - shapes[i].shape.circle.radius - 10,
@@ -672,13 +668,60 @@ int main() {
             tools = SELECTION;
           }
 
-          // Vector2 mouseDelta = GetMouseDelta();
-          // if(shapes[i].shape.rectangle.isSelected && CheckCollisionCircles(circleCenter,circleRadius,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-          //   shapes[i].shape.rectangle.isSelected = true;
-          //   DrawFPS(10, 100);
-          //   shapes[i].shape.circle.centerX += mouseDelta.x;
-          //   // shapes[i].shape.rectangle.height -= mouseDelta.y;
-          // }
+          Vector2 point1UpLine = (Vector2) {
+            .x = shapes[i].shape.circle.centerX - shapes[i].shape.circle.radius - 10,
+            .y = shapes[i].shape.circle.centerY - shapes[i].shape.circle.radius - 10,
+          };
+
+          Vector2 point2UpLine = (Vector2) {
+            .x = shapes[i].shape.circle.centerX + shapes[i].shape.circle.radius + 10,
+            .y = shapes[i].shape.circle.centerY - shapes[i].shape.circle.radius - 10,
+          };
+
+          Vector2 point2DownLine = (Vector2) {
+            .x = shapes[i].shape.circle.centerX + shapes[i].shape.circle.radius + 10,
+            .y = shapes[i].shape.circle.centerY + shapes[i].shape.circle.radius + 10,
+          };
+
+          Vector2 point1DownLine = (Vector2) {
+            .x = shapes[i].shape.circle.centerX - shapes[i].shape.circle.radius - 10,
+            .y = shapes[i].shape.circle.centerY + shapes[i].shape.circle.radius + 10,
+          };
+          Vector2 mouseDelta = GetMouseDelta();
+          // todo: improve point/line snapping/user interaction.
+          if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point1UpLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.circle.isSelected = true;
+            DrawLineDashed(point1UpLine,point2UpLine,10,10,RED);
+            shapes[i].shape.circle.centerY += mouseDelta.y;
+            shapes[i].shape.circle.radius -= mouseDelta.y;
+          }
+          else if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point2DownLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.circle.isSelected = true;
+            DrawLineDashed(point1DownLine,point2DownLine,10,10,RED);
+            shapes[i].shape.circle.radius += mouseDelta.y;
+          }
+          else if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point2DownLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.circle.isSelected = true;
+            DrawLineDashed(point2DownLine,point2UpLine,10,10,RED);
+            shapes[i].shape.circle.radius += mouseDelta.x;
+          }
+          else if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point1UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            shapes[i].shape.circle.isSelected = true;
+            DrawLineDashed(point1DownLine,point1UpLine,10,10,RED);
+            shapes[i].shape.circle.centerX += mouseDelta.x;
+            shapes[i].shape.circle.radius -= mouseDelta.x;
+          }
+
+          Rectangle rec = (Rectangle) {
+            .x = point1UpLine.x,
+            .y = point1UpLine.y,
+            .width = point2UpLine.x - point1UpLine.x,
+            .height =  point1DownLine.y - point1UpLine.y,
+          };
+
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
+            shapes[i].shape.circle.isSelected = false;
+          }
 
         } else if(shapes[i].type == SHAPE_FREELINE) {
           FreeLine line = shapes[i].shape.freeline;

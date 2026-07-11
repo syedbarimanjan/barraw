@@ -73,14 +73,16 @@ typedef enum Tools {
   RECTANGLE,
   CIRCLE,
   SELECTION,
+  // MOVE,
 } Tools;
 
 Tools tools;
 
 int main() {
   InitWindow(2000, 1000, "Barraw");
-  bool mouseWasPressed = false;
+  bool isSelectionRec = false;
   bool mouseIsDown = false;
+  bool moveTool = false;
 
   int shapesCount = 0;
   Shape *shapes;
@@ -117,7 +119,11 @@ int main() {
       tools = LINE;
     } else if(IsKeyPressed(KEY_V)){
       tools = SELECTION;
-    }
+      // isSelectionRec = false;
+    } 
+    // else if(IsKeyPressed(KEY_M)){
+    //   tools = MOVE;
+    // }
 
     Vector2 curr = GetMousePosition();
     float mousewheel = GetMouseWheelMove();
@@ -311,6 +317,133 @@ int main() {
 
     }
 
+    if(IsKeyDown(KEY_Q)){
+      isSelectionRec = true;
+    }
+
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == SELECTION && isSelectionRec) {
+      if(!mouseIsDown){
+        a=GetMousePosition();
+        pm = a;
+        mouseIsDown = true;
+        continue;
+      }
+
+      a=GetMousePosition();
+      int x= GetMouseX();
+      int y= GetMouseY();
+
+      BeginTextureMode(target2);
+        ClearBackground(BLACK);
+        DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y,WHITE);
+        DrawRectangle(pm.x,pm.y,a.x-pm.x,a.y-pm.y,Fade(WHITE,0.5));
+      EndTextureMode();
+    }
+    else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == SELECTION && isSelectionRec){
+      
+      mouseIsDown = false;
+
+      for (int i = 0; i < shapesCount; i++){
+        
+        Rectangle selectionRec = (Rectangle){
+          .x = pm.x,
+          .y = pm.y,
+          .width = a.x-pm.x,
+          .height = a.y-pm.y,
+        };
+
+        // (left, top)    =============== (right, top)
+        //       |                             |
+        // (left, bottom) =============== (right, bottom)
+        float left = fminf(selectionRec.x,selectionRec.x + selectionRec.width);
+        float right = fmaxf(selectionRec.x,selectionRec.x + selectionRec.width);
+
+        float top = fminf(selectionRec.y,selectionRec.y + selectionRec.height);
+        float bottom = fmaxf(selectionRec.y,selectionRec.y + selectionRec.height);
+
+        Rectangle selectionRec1 = (Rectangle){
+          .x = left,
+          .y = top,
+          .width = right-left,
+          .height = bottom-top,
+        };
+
+        Rectangle rec = (Rectangle){
+          .x = shapes[i].shape.rectangle.x,
+          .y = shapes[i].shape.rectangle.y,
+          .width = shapes[i].shape.rectangle.width,
+          .height = shapes[i].shape.rectangle.height,
+        };
+
+        Vector2 center = (Vector2){
+          .x = shapes[i].shape.circle.centerX,
+          .y = shapes[i].shape.circle.centerY,
+        };
+
+        Vector2 point = (Vector2){
+          .x = shapes[i].shape.line.startPosX,
+          .y = shapes[i].shape.line.startPosY,
+        };
+
+        Vector2 point1UpLine = (Vector2) {
+          .x = shapes[i].shape.line.startPosX,
+          .y = shapes[i].shape.line.startPosY,
+        };
+
+        Vector2 p2UpLine = (Vector2) {
+          .x = shapes[i].shape.line.endPosX - 1,
+          .y = shapes[i].shape.line.endPosY - 1,
+        };
+
+        Vector2 point1DownLine = (Vector2) {
+          .x = shapes[i].shape.line.startPosX + 1,
+          .y = shapes[i].shape.line.startPosY + 1,
+        };
+
+        Vector2 point2DownLine = (Vector2) {
+          .x = shapes[i].shape.line.endPosX,
+          .y = shapes[i].shape.line.endPosY,
+        };
+
+        Rectangle lineRec = (Rectangle){
+          .x = point1UpLine.x,
+          .y = point1UpLine.y,
+          .width = point2DownLine.x-point1UpLine.x,
+          .height = point2DownLine.y-point1UpLine.y,
+        };
+
+        if(CheckCollisionRecs(rec,selectionRec1)){
+          shapes[i].shape.rectangle.isSelected = true;
+        }
+        if(CheckCollisionCircleRec(center,shapes[i].shape.circle.radius,selectionRec1)){
+          shapes[i].shape.circle.isSelected = true;
+        }
+        if(CheckCollisionRecs(lineRec,selectionRec1)){
+          shapes[i].shape.line.isSelected = true;
+        }
+        // if(shapes[i].shape.rectangle.isSelected && CheckCollisionRecs(rec,selectionRec1)){
+        //   isSelectionRec = false;
+        //   break;
+        // }
+        // if(shapes[i].shape.circle.isSelected && CheckCollisionCircleRec(center,shapes[i].shape.circle.radius,selectionRec1)){
+        //   isSelectionRec = false;
+        //   break;
+
+        // }
+        // if(shapes[i].shape.line.isSelected && CheckCollisionRecs(lineRec,selectionRec1)){
+        //   isSelectionRec = false;
+        //   break;
+        // }
+      }
+      
+
+      BeginTextureMode(target2);
+        ClearBackground(BLACK);
+      EndTextureMode();
+    }
+
+    
+
     if(IsKeyPressed(KEY_A)){
       free(shapes);
       shapes = NULL;
@@ -346,10 +479,11 @@ int main() {
 
           if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointLine(currentMousePosition,p1,p2,10)){
             shapes[i].shape.line.isSelected = false;
+            moveTool = false;
           }
 
 
-          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+          if(moveTool && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             Vector2 mouseDelta = GetMouseDelta();
             Vector2 currentMousePosition = GetMousePosition();
 
@@ -380,8 +514,33 @@ int main() {
               shapes[i].shape.line = (Line){};
             }
           }
+
+          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+            Vector2 mouseDelta = GetMouseDelta();
+            Vector2 currentMousePosition = GetMousePosition();
+
+            Vector2 p1 = (Vector2) {
+              .x = shapes[i].shape.line.startPosX,
+              .y = shapes[i].shape.line.startPosY,
+            };
+
+            Vector2 p2 = (Vector2) {
+              .x = shapes[i].shape.line.endPosX,
+              .y = shapes[i].shape.line.endPosY,
+            };
+
+            if(CheckCollisionPointLine(currentMousePosition,p1,p2,5)){
+              shapes[i].shape.line.isSelected = true;
+            }
+
+            // if(CheckCollisionPointLine(currentMousePosition,p1,p2,10) && IsKeyDown(KEY_DELETE)){
+            //   shapes[i].shape.line = (Line){};
+            // }
+          }
+
           // todo: diagonol lines bounding box is squinted.
           if(shapes[i].shape.line.isSelected){
+            moveTool = true;
             Vector2 point1UpLine = (Vector2) {
               .x = shapes[i].shape.line.startPosX - 10,
               .y = shapes[i].shape.line.startPosY - 10,
@@ -425,14 +584,14 @@ int main() {
             tools = SELECTION;
           }
 
-          if(CheckCollisionCircles(p1,10,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+          if(CheckCollisionCircles(p1,10,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)  && !isSelectionRec){
             shapes[i].shape.line.isSelected = false;
             DrawFPS(10,100);
             DrawCircleV(p1,10,RED);
             shapes[i].shape.line.startPosX += mouseDelta.x;
             shapes[i].shape.line.startPosY += mouseDelta.y;
           }
-          else if (CheckCollisionCircles(p2,10,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+          else if (CheckCollisionCircles(p2,10,currentMousePosition,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec) {
               shapes[i].shape.line.isSelected = false;
               DrawFPS(10,100);
               DrawCircleV(p2,10,RED);
@@ -449,7 +608,7 @@ int main() {
             shapes[i].shape.rectangle.color
           );
 
-          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+          if(moveTool && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
             Vector2 mouseDelta = GetMouseDelta();
             Vector2 currentMousePosition = GetMousePosition();
 
@@ -472,6 +631,25 @@ int main() {
             }
           }
 
+          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
+            Vector2 mouseDelta = GetMouseDelta();
+            Vector2 currentMousePosition = GetMousePosition();
+
+            Rectangle rec = (Rectangle) {
+              .x =shapes[i].shape.rectangle.x,
+              .y =shapes[i].shape.rectangle.y,
+              .width =shapes[i].shape.rectangle.width,
+              .height =shapes[i].shape.rectangle.height,
+            };
+            if(CheckCollisionPointRec(currentMousePosition,rec)){
+              shapes[i].shape.rectangle.isSelected = true;
+            }
+
+            // if(CheckCollisionPointRec(currentMousePosition,rec) && IsKeyDown(KEY_DELETE)){
+            //   shapes[i].shape.rectangle = (Rectangled) {};
+            // }
+          }
+
           Vector2 currentMousePosition = GetMousePosition();
           Rectangle rec = (Rectangle) {
             .x =shapes[i].shape.rectangle.x - 10,
@@ -482,9 +660,11 @@ int main() {
 
           if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
             shapes[i].shape.rectangle.isSelected = false;
+            moveTool = false;
           }
 
           if(shapes[i].shape.rectangle.isSelected){
+            moveTool = true;
             // (left, top)    =============== (right, top)
             //       |                             |
             // (left, bottom) =============== (right, bottom)
@@ -595,7 +775,7 @@ int main() {
             shapes[i].shape.circle.color
           );
 
-          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+          if(moveTool && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
             Vector2 mouseDelta = GetMouseDelta();
             Vector2 currentMousePosition = GetMousePosition();
 
@@ -618,6 +798,25 @@ int main() {
             }
           }
 
+          if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
+            Vector2 mouseDelta = GetMouseDelta();
+            Vector2 currentMousePosition = GetMousePosition();
+
+            Vector2 circleCenter = (Vector2) {
+              .x = shapes[i].shape.circle.centerX,
+              .y = shapes[i].shape.circle.centerY,
+            };
+
+            float circleRadius = shapes[i].shape.circle.radius;
+
+            if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius)){
+              shapes[i].shape.circle.isSelected = true;
+            }
+            // if(CheckCollisionPointCircle(currentMousePosition,circleCenter,circleRadius) && IsKeyDown(KEY_DELETE)){
+            //   shapes[i].shape.circle = (Circle){};
+            // }
+          }
+
           Vector2 currentMousePosition = GetMousePosition();
           Vector2 circleCenter = (Vector2) {
             .x = shapes[i].shape.circle.centerX,
@@ -626,6 +825,7 @@ int main() {
           float circleRadius = shapes[i].shape.circle.radius;
 
           if(shapes[i].shape.circle.isSelected){
+            moveTool =true;
             Vector2 circleTopLeft = (Vector2) {
               .x = shapes[i].shape.circle.centerX - shapes[i].shape.circle.radius - 10,
               .y = shapes[i].shape.circle.centerY - shapes[i].shape.circle.radius - 10,
@@ -721,6 +921,7 @@ int main() {
 
           if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
             shapes[i].shape.circle.isSelected = false;
+            moveTool = false;
           }
 
         } else if(shapes[i].type == SHAPE_FREELINE) {

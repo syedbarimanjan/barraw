@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include <raylib.h>
+#include "raygui.h"
 #include <raymath.h>
 
 #include <math.h>
@@ -15,6 +16,7 @@ typedef struct {
   float height;
   Color color;
   bool isSelected;
+  int z_index;
 } Rectangled;
 
 typedef struct {
@@ -24,6 +26,7 @@ typedef struct {
   float radius;
   Color color;
   bool isSelected;
+  int z_index;
 } Circle;
 
 
@@ -35,12 +38,14 @@ typedef struct {
   int endPosY;
   Color color;
   bool isSelected;
+  int z_index;
 } Line;
 
 typedef struct {
   int id;
   Circle *circles;
   int circlesCount;
+  int z_index;
 } FreeLine;
 
 typedef enum {
@@ -79,7 +84,12 @@ typedef enum Tools {
 Tools tools;
 
 int main() {
-  InitWindow(2000, 1000, "Barraw");
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+  int width = 1920;
+  int height = 1080;
+  SetConfigFlags(FLAG_WINDOW_MAXIMIZED);
+  InitWindow(width, height, "Barraw");
+
   bool isSelectionRec = false;
   bool mouseIsDown = false;
   bool moveTool = false;
@@ -97,8 +107,8 @@ int main() {
   circles = malloc(sizeof(Circle) * circleCount);
 
 
-  RenderTexture2D target = LoadRenderTexture(2000,1000);
-  RenderTexture2D target2 = LoadRenderTexture(2000,1000);
+  RenderTexture2D target = LoadRenderTexture(width,height);
+  RenderTexture2D target2 = LoadRenderTexture(width,height);
 
   Vector2 prevMouse = {0};
   bool penStarted = false;
@@ -108,6 +118,14 @@ int main() {
   float penradius = 1.0f;
   tools= PEN;
   while(!WindowShouldClose()) {
+
+    if(IsWindowResized()){
+      width = GetScreenWidth();
+      height = GetScreenHeight();
+
+      target = LoadRenderTexture(width,height);
+      target2 = LoadRenderTexture(width,height);
+    }
 
     if(IsKeyPressed(KEY_R)){
       tools = RECTANGLE;
@@ -120,7 +138,7 @@ int main() {
     } else if(IsKeyPressed(KEY_V)){
       tools = SELECTION;
       // isSelectionRec = false;
-    } 
+    }
     // else if(IsKeyPressed(KEY_M)){
     //   tools = MOVE;
     // }
@@ -180,7 +198,8 @@ int main() {
       shapes[shapesCount - 1].shape.freeline = (FreeLine) {
         .id = shapesCount -1,
         .circles = circlesCopy,
-        .circlesCount = circleCount
+        .circlesCount = circleCount,
+        .z_index = shapesCount - 1,
       };
       circleCount = 0;
       free(circles);
@@ -222,6 +241,7 @@ int main() {
         .endPosX = a.x,
         .endPosY = a.y,
         .isSelected = true,
+        .z_index = shapesCount -1,
       };
 
       BeginTextureMode(target2);
@@ -260,6 +280,7 @@ int main() {
         .height = a.y-pm.y,
         .id = shapesCount -1,
         .isSelected = true,
+        .z_index = shapesCount -1,
       };
 
       BeginTextureMode(target2);
@@ -309,6 +330,7 @@ int main() {
         .radius = radius/2,
         .color = PINK,
         .isSelected = true,
+        .z_index = shapesCount - 1,
       };
 
       BeginTextureMode(target2);
@@ -340,11 +362,11 @@ int main() {
       EndTextureMode();
     }
     else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == SELECTION && isSelectionRec){
-      
+
       mouseIsDown = false;
 
       for (int i = 0; i < shapesCount; i++){
-        
+
         Rectangle selectionRec = (Rectangle){
           .x = pm.x,
           .y = pm.y,
@@ -435,14 +457,14 @@ int main() {
         //   break;
         // }
       }
-      
+
 
       BeginTextureMode(target2);
         ClearBackground(BLACK);
       EndTextureMode();
     }
 
-    
+
 
     if(IsKeyPressed(KEY_A)){
       free(shapes);
@@ -452,8 +474,9 @@ int main() {
 
     BeginTextureMode(target);
       ClearBackground(BLACK);
-      DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
 
+      DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
+      // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
       for(int i = 0; i < shapesCount; i++){
         if(shapes[i].type == SHAPE_LINE) {
           DrawLine(
@@ -463,6 +486,8 @@ int main() {
             shapes[i].shape.line.endPosY,
             shapes[i].shape.line.color
           );
+
+          // if(shapes[i].shape.line.z_index > )
 
           Vector2 mouseDelta = GetMouseDelta();
           Vector2 currentMousePosition = GetMousePosition();
@@ -973,8 +998,20 @@ int main() {
     EndTextureMode();
 
     BeginDrawing();
+
+    // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
+    // DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Rectangle){ 0, 0, (float)target.texture.width + width, (float)-target.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
+
     DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
     DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
+    // int panelWidth = 500;
+    // GuiPanel((Rectangle){width/2-panelWidth/2,10,panelWidth,100}, "Tools");
+    // GuiButton((Rectangle){750,30,100,80}, "Pen");
+    // GuiButton((Rectangle){850,30,100,80}, "Rectangle");
+    // GuiButton((Rectangle){950,30,100,80}, "Circle");
+    // GuiButton((Rectangle){1050,30,100,80}, "Line");
+    // GuiButton((Rectangle){1150,30,100,80}, "Selection");
+
     EndDrawing();
   }
 

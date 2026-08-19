@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
@@ -110,6 +111,11 @@ int main() {
   RenderTexture2D target = LoadRenderTexture(width,height);
   RenderTexture2D target2 = LoadRenderTexture(width,height);
 
+  Camera2D camera = { 0 };
+  camera.zoom = 1.0f;
+  camera.target = (Vector2){0,0};
+  camera.offset = (Vector2){0,0};
+
   Vector2 prevMouse = {0};
   bool penStarted = false;
   Vector2 pm = {0};
@@ -125,6 +131,27 @@ int main() {
 
       target = LoadRenderTexture(width,height);
       target2 = LoadRenderTexture(width,height);
+    }
+
+    float wheel = GetMouseWheelMove();
+    if(wheel != 0){
+
+      Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
+
+      camera.offset = GetScreenToWorld2D(GetMousePosition(), camera);
+
+      camera.target = mouseWorldPos;
+
+      float scale = 0.2f*wheel;
+      camera.zoom = Clamp(expf(logf(camera.zoom)+scale), 0.125f, 64.0f);
+    }
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)){
+      Vector2 delta = GetMouseDelta();
+      delta.x /= camera.zoom;
+      delta.y /= camera.zoom;
+      camera.target.x -= delta.x;
+      camera.target.y -= delta.y;
     }
 
     if(IsKeyPressed(KEY_R)){
@@ -143,7 +170,7 @@ int main() {
     //   tools = MOVE;
     // }
 
-    Vector2 curr = GetMousePosition();
+    Vector2 curr = GetScreenToWorld2D(GetMousePosition(), camera);
     float mousewheel = GetMouseWheelMove();
     penradius+=GetMouseWheelMove();
     if (penradius < 2) penradius = 2;
@@ -211,14 +238,14 @@ int main() {
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == LINE) {
       if(!mouseIsDown){
-        a=GetMousePosition();
+        a=GetScreenToWorld2D(GetMousePosition(), camera);
         pm = a;
         mouseIsDown = true;
         continue;
       }
 
 
-      a=GetMousePosition();
+      a=GetScreenToWorld2D(GetMousePosition(), camera);
       int x= GetMouseX();
       int y= GetMouseY();
 
@@ -251,13 +278,13 @@ int main() {
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == RECTANGLE) {
       if(!mouseIsDown){
-        a=GetMousePosition();
+        a=GetScreenToWorld2D(GetMousePosition(), camera);
         pm = a;
         mouseIsDown = true;
         continue;
       }
 
-      a=GetMousePosition();
+      a=GetScreenToWorld2D(GetMousePosition(), camera);
       int x= GetMouseX();
       int y= GetMouseY();
 
@@ -290,14 +317,14 @@ int main() {
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == CIRCLE) {
       if(!mouseIsDown){
-        a=GetMousePosition();
+        a=GetScreenToWorld2D(GetMousePosition(), camera);
         pm = a;
         mouseIsDown = true;
         continue;
       }
 
 
-      a=GetMousePosition();
+      a=GetScreenToWorld2D(GetMousePosition(), camera);
       int x= GetMouseX();
       int y= GetMouseY();
 
@@ -345,13 +372,13 @@ int main() {
 
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && tools == SELECTION && isSelectionRec) {
       if(!mouseIsDown){
-        a=GetMousePosition();
+        a=GetScreenToWorld2D(GetMousePosition(), camera);
         pm = a;
         mouseIsDown = true;
         continue;
       }
 
-      a=GetMousePosition();
+      a=GetScreenToWorld2D(GetMousePosition(), camera);
       int x= GetMouseX();
       int y= GetMouseY();
 
@@ -474,8 +501,9 @@ int main() {
 
     BeginTextureMode(target);
       ClearBackground(BLACK);
-
-      DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
+      BeginMode2D(camera);
+        DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
+      EndMode2D();
       // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
       for(int i = 0; i < shapesCount; i++){
         if(shapes[i].type == SHAPE_LINE) {
@@ -490,7 +518,7 @@ int main() {
           // if(shapes[i].shape.line.z_index > )
 
           Vector2 mouseDelta = GetMouseDelta();
-          Vector2 currentMousePosition = GetMousePosition();
+          Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
           Vector2 p1 = (Vector2) {
             .x = shapes[i].shape.line.startPosX,
@@ -510,7 +538,7 @@ int main() {
 
           if(moveTool && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             Vector2 mouseDelta = GetMouseDelta();
-            Vector2 currentMousePosition = GetMousePosition();
+            Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
             Vector2 p1 = (Vector2) {
               .x = shapes[i].shape.line.startPosX,
@@ -542,7 +570,7 @@ int main() {
 
           if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             Vector2 mouseDelta = GetMouseDelta();
-            Vector2 currentMousePosition = GetMousePosition();
+            Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
             Vector2 p1 = (Vector2) {
               .x = shapes[i].shape.line.startPosX,
@@ -635,7 +663,7 @@ int main() {
 
           if(moveTool && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
             Vector2 mouseDelta = GetMouseDelta();
-            Vector2 currentMousePosition = GetMousePosition();
+            Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
             Rectangle rec = (Rectangle) {
               .x =shapes[i].shape.rectangle.x,
@@ -658,7 +686,7 @@ int main() {
 
           if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
             Vector2 mouseDelta = GetMouseDelta();
-            Vector2 currentMousePosition = GetMousePosition();
+            Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
             Rectangle rec = (Rectangle) {
               .x =shapes[i].shape.rectangle.x,
@@ -675,7 +703,7 @@ int main() {
             // }
           }
 
-          Vector2 currentMousePosition = GetMousePosition();
+          Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
           Rectangle rec = (Rectangle) {
             .x =shapes[i].shape.rectangle.x - 10,
             .y =shapes[i].shape.rectangle.y - 10,
@@ -802,7 +830,7 @@ int main() {
 
           if(moveTool && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
             Vector2 mouseDelta = GetMouseDelta();
-            Vector2 currentMousePosition = GetMousePosition();
+            Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
             Vector2 circleCenter = (Vector2) {
               .x = shapes[i].shape.circle.centerX,
@@ -825,7 +853,7 @@ int main() {
 
           if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isSelectionRec){
             Vector2 mouseDelta = GetMouseDelta();
-            Vector2 currentMousePosition = GetMousePosition();
+            Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
 
             Vector2 circleCenter = (Vector2) {
               .x = shapes[i].shape.circle.centerX,
@@ -842,7 +870,7 @@ int main() {
             // }
           }
 
-          Vector2 currentMousePosition = GetMousePosition();
+          Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
           Vector2 circleCenter = (Vector2) {
             .x = shapes[i].shape.circle.centerX,
             .y = shapes[i].shape.circle.centerY,
@@ -962,7 +990,7 @@ int main() {
             // todo: combine the circle into a single line and then make that line moveable.
             // if(tools == SELECTION && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             //   Vector2 mouseDelta = GetMouseDelta();
-            //   Vector2 currentMousePosition = GetMousePosition();
+            //   Vector2 currentMousePosition = GetScreenToWorld2D(GetMousePosition(), camera);
             //   Vector2 circleCenter = (Vector2) {
             //     .x = shapes[i].shape.freeline.circles[j].centerX,
             //     .y = shapes[i].shape.freeline.circles[j].centerY,
@@ -998,19 +1026,22 @@ int main() {
     EndTextureMode();
 
     BeginDrawing();
+      ClearBackground(DARKGRAY);
 
-    // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
-    // DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Rectangle){ 0, 0, (float)target.texture.width + width, (float)-target.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
+      // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
+      // DrawTexturePro(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Rectangle){ 0, 0, (float)target.texture.width + width, (float)-target.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
 
-    DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
-    DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
-    // int panelWidth = 500;
-    // GuiPanel((Rectangle){width/2-panelWidth/2,10,panelWidth,100}, "Tools");
-    // GuiButton((Rectangle){750,30,100,80}, "Pen");
-    // GuiButton((Rectangle){850,30,100,80}, "Rectangle");
-    // GuiButton((Rectangle){950,30,100,80}, "Circle");
-    // GuiButton((Rectangle){1050,30,100,80}, "Line");
-    // GuiButton((Rectangle){1150,30,100,80}, "Selection");
+      BeginMode2D(camera);
+        DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
+        DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
+      EndMode2D();
+      // int panelWidth = 500;
+      // GuiPanel((Rectangle){width/2-panelWidth/2,10,panelWidth,100}, "Tools");
+      // GuiButton((Rectangle){750,30,100,80}, "Pen");
+      // GuiButton((Rectangle){850,30,100,80}, "Rectangle");
+      // GuiButton((Rectangle){950,30,100,80}, "Circle");
+      // GuiButton((Rectangle){1050,30,100,80}, "Line");
+      // GuiButton((Rectangle){1150,30,100,80}, "Selection");
 
     EndDrawing();
   }

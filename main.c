@@ -138,7 +138,7 @@ int main() {
 
       Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), camera);
 
-      camera.offset = GetScreenToWorld2D(GetMousePosition(), camera);
+      camera.offset = GetMousePosition();
 
       camera.target = mouseWorldPos;
 
@@ -501,9 +501,7 @@ int main() {
 
     BeginTextureMode(target);
       ClearBackground(BLACK);
-      BeginMode2D(camera);
-        DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
-      EndMode2D();
+      DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
       // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
       for(int i = 0; i < shapesCount; i++){
         if(shapes[i].type == SHAPE_LINE) {

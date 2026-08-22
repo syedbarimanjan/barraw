@@ -6,6 +6,7 @@
 #include <raylib.h>
 #include "raygui.h"
 #include <raymath.h>
+#include "rlgl.h"
 
 #include <math.h>
 
@@ -143,7 +144,7 @@ int main() {
       camera.target = mouseWorldPos;
 
       float scale = 0.2f*wheel;
-      camera.zoom = Clamp(expf(logf(camera.zoom)+scale), 0.125f, 64.0f);
+      camera.zoom = Clamp(expf(logf(camera.zoom)+scale),0.5f, 64.0f);
     }
 
     if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)){
@@ -290,7 +291,7 @@ int main() {
 
       BeginTextureMode(target2);
         ClearBackground(BLACK);
-        DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y,BLUE);
+        DrawRectangleLinesEx((Rectangle){pm.x,pm.y,a.x-pm.x,a.y-pm.y}, 1.0f + (camera.zoom*1.5), BLUE);
       EndTextureMode();
     }
     else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == RECTANGLE){
@@ -384,7 +385,7 @@ int main() {
 
       BeginTextureMode(target2);
         ClearBackground(BLACK);
-        DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y,WHITE);
+        DrawRectangleLinesEx((Rectangle){pm.x,pm.y,a.x-pm.x,a.y-pm.y}, 1.0f + (camera.zoom*1.5), WHITE);
         DrawRectangle(pm.x,pm.y,a.x-pm.x,a.y-pm.y,Fade(WHITE,0.5));
       EndTextureMode();
     }
@@ -612,6 +613,7 @@ int main() {
               .y = shapes[i].shape.line.endPosY + 10,
             };
 
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1UpLine,p2UpLine,10,10,WHITE);
             DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
             DrawLineDashed(point1UpLine,point1DownLine,10,10,WHITE);
@@ -651,11 +653,14 @@ int main() {
           }
 
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
-          DrawRectangleLines(
-            shapes[i].shape.rectangle.x,
-            shapes[i].shape.rectangle.y,
-            shapes[i].shape.rectangle.width,
-            shapes[i].shape.rectangle.height,
+          DrawRectangleLinesEx(
+            (Rectangle){
+              shapes[i].shape.rectangle.x,
+              shapes[i].shape.rectangle.y,
+              shapes[i].shape.rectangle.width,
+              shapes[i].shape.rectangle.height,
+            },
+            1.0f + (camera.zoom*1.5),
             shapes[i].shape.rectangle.color
           );
 
@@ -748,6 +753,7 @@ int main() {
             };
             DrawCircle(center.x,center.y,5,WHITE);
 
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1UpLine,point2UpLine,10,10,WHITE);
             DrawLineDashed(point1DownLine,point2DownLine,10,10,WHITE);
             DrawLineDashed(point2DownLine,point2UpLine,10,10,WHITE);
@@ -797,22 +803,26 @@ int main() {
           Vector2 mouseDelta = GetMouseDelta();
           if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point1UpLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.rectangle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1UpLine,point2UpLine,10,10,RED);
             shapes[i].shape.rectangle.y += mouseDelta.y;
             shapes[i].shape.rectangle.height -= mouseDelta.y;
           }
           else if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point2DownLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.rectangle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1DownLine,point2DownLine,10,10,RED);
             shapes[i].shape.rectangle.height += mouseDelta.y;
           }
           else if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point2DownLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.rectangle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point2DownLine,point2UpLine,10,10,RED);
             shapes[i].shape.rectangle.width += mouseDelta.x;
           }
           else if(shapes[i].shape.rectangle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point1UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.rectangle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1DownLine,point1UpLine,10,10,RED);
             shapes[i].shape.rectangle.x += mouseDelta.x;
             shapes[i].shape.rectangle.width -= mouseDelta.x;
@@ -897,6 +907,7 @@ int main() {
               .y = shapes[i].shape.circle.centerY + shapes[i].shape.circle.radius + 10,
             };
 
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(circleTopLeft, circleTopRight, 10, 10, WHITE);
             DrawLineDashed(circleBottomLeft, circleBottomRight, 10, 10, WHITE);
             DrawLineDashed(circleTopLeft, circleBottomLeft, 10, 10, WHITE);
@@ -942,22 +953,26 @@ int main() {
           // todo: improve point/line snapping/user interaction.
           if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point1UpLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.circle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1UpLine,point2UpLine,10,10,RED);
             shapes[i].shape.circle.centerY += mouseDelta.y;
             shapes[i].shape.circle.radius -= mouseDelta.y;
           }
           else if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point2DownLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.circle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1DownLine,point2DownLine,10,10,RED);
             shapes[i].shape.circle.radius += mouseDelta.y;
           }
           else if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point2DownLine,point2UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.circle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point2DownLine,point2UpLine,10,10,RED);
             shapes[i].shape.circle.radius += mouseDelta.x;
           }
           else if(shapes[i].shape.circle.isSelected && CheckCollisionPointLine(currentMousePosition,point1DownLine,point1UpLine,10) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             shapes[i].shape.circle.isSelected = true;
+            rlSetLineWidth(1.0f+(camera.zoom*1.5));
             DrawLineDashed(point1DownLine,point1UpLine,10,10,RED);
             shapes[i].shape.circle.centerX += mouseDelta.x;
             shapes[i].shape.circle.radius -= mouseDelta.x;
@@ -1033,13 +1048,6 @@ int main() {
         DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
         DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
       EndMode2D();
-      // int panelWidth = 500;
-      // GuiPanel((Rectangle){width/2-panelWidth/2,10,panelWidth,100}, "Tools");
-      // GuiButton((Rectangle){750,30,100,80}, "Pen");
-      // GuiButton((Rectangle){850,30,100,80}, "Rectangle");
-      // GuiButton((Rectangle){950,30,100,80}, "Circle");
-      // GuiButton((Rectangle){1050,30,100,80}, "Line");
-      // GuiButton((Rectangle){1150,30,100,80}, "Selection");
 
     EndDrawing();
   }

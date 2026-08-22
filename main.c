@@ -1049,6 +1049,25 @@ int main() {
         DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
       EndMode2D();
 
+      int panelWidth = 500;
+      GuiPanel((Rectangle){width/2-panelWidth/2,10,panelWidth,100}, "Tools");
+
+      if(GuiButton((Rectangle){width/2-panelWidth/2,30,100,80}, "Pen")){
+        tools=PEN;
+      };
+      if(GuiButton((Rectangle){width/2-panelWidth/2+100,30,100,80}, "Rectangle")){
+        tools=RECTANGLE;
+      };
+      if(GuiButton((Rectangle){width/2-panelWidth/2+200,30,100,80}, "Circle")){
+        tools=CIRCLE;
+      };
+      if(GuiButton((Rectangle){width/2-panelWidth/2+300,30,100,80}, "Line")){
+        tools=LINE;
+      };
+      if(GuiButton((Rectangle){width/2-panelWidth/2+400,30,100,80}, "Selection")){
+        tools=SELECTION;
+      };
+
     EndDrawing();
   }
 

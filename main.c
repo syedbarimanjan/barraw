@@ -291,7 +291,9 @@ int main() {
 
       BeginTextureMode(target2);
         ClearBackground(BLACK);
-        DrawRectangleLinesEx((Rectangle){pm.x,pm.y,a.x-pm.x,a.y-pm.y}, 1.0f + (camera.zoom*1.5), BLUE);
+        rlSetLineWidth(1.0f+(camera.zoom*1.5));
+        DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y, BLUE);
+        // DrawRectangleLinesEx((Rectangle){pm.x,pm.y,a.x-pm.x,a.y-pm.y}, 1.0f + (camera.zoom*1.5), BLUE);
       EndTextureMode();
     }
     else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == RECTANGLE){
@@ -383,10 +385,28 @@ int main() {
       int x= GetMouseX();
       int y= GetMouseY();
 
+      Rectangle selectionRec = (Rectangle){
+        .x = pm.x,
+        .y = pm.y,
+        .width = a.x-pm.x,
+        .height = a.y-pm.y,
+      };
+
+      // (left, top)    =============== (right, top)
+      //       |                             |
+      // (left, bottom) =============== (right, bottom)
+      float left = fminf(selectionRec.x,selectionRec.x + selectionRec.width);
+      float right = fmaxf(selectionRec.x,selectionRec.x + selectionRec.width);
+
+      float top = fminf(selectionRec.y,selectionRec.y + selectionRec.height);
+      float bottom = fmaxf(selectionRec.y,selectionRec.y + selectionRec.height);
+
       BeginTextureMode(target2);
         ClearBackground(BLACK);
-        DrawRectangleLinesEx((Rectangle){pm.x,pm.y,a.x-pm.x,a.y-pm.y}, 1.0f + (camera.zoom*1.5), WHITE);
-        DrawRectangle(pm.x,pm.y,a.x-pm.x,a.y-pm.y,Fade(WHITE,0.5));
+        rlSetLineWidth(1.0f+(camera.zoom*1.5));
+        DrawRectangleLines(pm.x,pm.y,a.x-pm.x,a.y-pm.y, WHITE);
+        // DrawRectangleLinesEx((Rectangle){pm.x,pm.y,a.x-pm.x,a.y-pm.y}, 1.0f + (camera.zoom*1.5), WHITE);
+        DrawRectangle(left,top,right-left,bottom-top,Fade(WHITE,0.5));
       EndTextureMode();
     }
     else if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && tools == SELECTION && isSelectionRec){
@@ -506,6 +526,7 @@ int main() {
       // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
       for(int i = 0; i < shapesCount; i++){
         if(shapes[i].type == SHAPE_LINE) {
+          rlSetLineWidth(1.0f+(camera.zoom*1.5));
           DrawLine(
             shapes[i].shape.line.startPosX,
             shapes[i].shape.line.startPosY,
@@ -653,14 +674,12 @@ int main() {
           }
 
         } else if(shapes[i].type == SHAPE_RECTANGLE) {
-          DrawRectangleLinesEx(
-            (Rectangle){
+          rlSetLineWidth(1.0f+(camera.zoom*1.5));
+          DrawRectangleLines(
               shapes[i].shape.rectangle.x,
               shapes[i].shape.rectangle.y,
               shapes[i].shape.rectangle.width,
               shapes[i].shape.rectangle.height,
-            },
-            1.0f + (camera.zoom*1.5),
             shapes[i].shape.rectangle.color
           );
 

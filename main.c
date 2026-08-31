@@ -1,5 +1,7 @@
+#include <ctype.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -95,6 +97,8 @@ int main() {
   bool isSelectionRec = false;
   bool mouseIsDown = false;
   bool moveTool = false;
+  bool deleteShapePressed = false;
+  bool mouseOverToolbar = false;
 
   int shapesCount = 0;
   Shape *shapes;
@@ -522,6 +526,14 @@ int main() {
 
     BeginTextureMode(target);
       ClearBackground(BLACK);
+      int panelWidths = 800;
+      Rectangle toolbarRec = {
+        width/2 - panelWidths/2,
+        10,
+        panelWidths,
+        100
+      };
+      mouseOverToolbar = CheckCollisionPointRec(GetMousePosition(), toolbarRec);
       DrawTextureRec(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Vector2) { 0, 0 }, WHITE);
       // DrawTexturePro(target2.texture, (Rectangle){ 0, 0, (float)target2.texture.width, (float)-target2.texture.height }, (Rectangle){ 0, 0, (float)target2.texture.width + width, (float)-target2.texture.height + height }, (Vector2) { 0, 0 }, 0, WHITE);
       for(int i = 0; i < shapesCount; i++){
@@ -550,7 +562,7 @@ int main() {
             .y = shapes[i].shape.line.endPosY,
           };
 
-          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointLine(currentMousePosition,p1,p2,10)){
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointLine(currentMousePosition,p1,p2,10) && !mouseOverToolbar){
             shapes[i].shape.line.isSelected = false;
             moveTool = false;
           }
@@ -584,6 +596,7 @@ int main() {
             }
 
             if(CheckCollisionPointLine(currentMousePosition,p1,p2,10) && IsKeyDown(KEY_DELETE)){
+              deleteShapePressed = false;
               shapes[i].shape.line = (Line){};
             }
           }
@@ -702,6 +715,7 @@ int main() {
             }
 
             if(CheckCollisionPointRec(currentMousePosition,rec) && IsKeyDown(KEY_DELETE)){
+              deleteShapePressed = false;
               shapes[i].shape.rectangle = (Rectangled) {};
             }
           }
@@ -733,7 +747,7 @@ int main() {
             .height =shapes[i].shape.rectangle.height + 20,
           };
 
-          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec) && !mouseOverToolbar){
             shapes[i].shape.rectangle.isSelected = false;
             moveTool = false;
           }
@@ -1004,7 +1018,7 @@ int main() {
             .height =  point1DownLine.y - point1UpLine.y,
           };
 
-          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec)){
+          if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(currentMousePosition,rec) && !mouseOverToolbar){
             shapes[i].shape.circle.isSelected = false;
             moveTool = false;
           }
@@ -1042,6 +1056,25 @@ int main() {
 
       }
 
+      for (int i = 0; i < shapesCount; i++){
+        if(deleteShapePressed && shapes[i].shape.circle.isSelected){
+          printf("DELETE PRESSED\n");
+          printf("shape %d: type=%d selected=%d\n",i,shapes[i].type,shapes[i].shape.circle.isSelected);
+          shapes[i].shape.circle = (Circle){};
+          break;
+        }
+
+        if(deleteShapePressed && shapes[i].shape.line.isSelected){
+          shapes[i].shape.line = (Line){};
+          break;
+        }
+
+        if(deleteShapePressed && shapes[i].shape.rectangle.isSelected){
+          shapes[i].shape.rectangle = (Rectangled){};
+          break;
+        }
+      }
+
       if(copiedShapesCount > 0){
         int oldShapesCount = shapesCount;
         shapesCount += copiedShapesCount;
@@ -1068,7 +1101,7 @@ int main() {
         DrawTextureRec(target.texture, (Rectangle){ 0, 0, (float)target.texture.width, (float)-target.texture.height }, (Vector2) { 0, 0 }, WHITE);
       EndMode2D();
 
-      int panelWidth = 500;
+      int panelWidth = 800;
       GuiPanel((Rectangle){width/2-panelWidth/2,10,panelWidth,100}, "Tools");
 
       if(GuiButton((Rectangle){width/2-panelWidth/2,30,100,80}, "Pen")){
@@ -1083,10 +1116,24 @@ int main() {
       if(GuiButton((Rectangle){width/2-panelWidth/2+300,30,100,80}, "Line")){
         tools=LINE;
       };
-      if(GuiButton((Rectangle){width/2-panelWidth/2+400,30,100,80}, "Selection")){
+      if(GuiButton((Rectangle){width/2-panelWidth/2+400,30,100,80}, "Selection Single")){
+        isSelectionRec = false;
         tools=SELECTION;
       };
-
+      if(GuiButton((Rectangle){width/2-panelWidth/2+500,30,100,80}, "Selection Mulitple")){
+        tools = SELECTION;
+        isSelectionRec = true;
+      };
+      if(GuiButton((Rectangle){width/2-panelWidth/2+600,30,100,80}, "Clear Canvas")){
+        free(shapes);
+        shapes = NULL;
+        shapesCount = 0;
+      };
+      if(GuiButton((Rectangle){width/2-panelWidth/2+700,30,100,80}, "Delete Shape")){
+        deleteShapePressed = true;
+      } else {
+        deleteShapePressed = false;
+      }
     EndDrawing();
   }
 
